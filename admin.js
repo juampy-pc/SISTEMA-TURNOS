@@ -71,7 +71,7 @@
     return (
       '<header class="app-header">' +
         '<div class="app-header-inner">' +
-          '<span class="brand"><span class="brand-mark" aria-hidden="true">T</span><span class="brand-text">' + ST.esc(ST.negocio.nombre) + ' · Admin</span></span>' +
+          '<span class="brand"><span class="brand-text">' + ST.esc(ST.negocio.nombre) + ' · Admin</span></span>' +
           '<button type="button" class="btn btn-ghost btn-sm" data-action="logout">Cerrar sesión</button>' +
         "</div>" +
         '<nav class="tabs" aria-label="Secciones del panel">' + tabsHtml + "</nav>" +

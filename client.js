@@ -45,7 +45,7 @@
       '<header class="site-header">' +
         '<div class="site-header-inner">' +
           '<a class="brand" href="#inicio">' +
-            '<span class="brand-mark" aria-hidden="true">T</span>' +
+            '' +
             '<span class="brand-text">' + ST.esc(ST.negocio.nombre) + "</span>" +
           "</a>" +
           '<nav class="site-nav" aria-label="Navegación principal">' +
@@ -343,7 +343,7 @@
     return (
       '<header class="app-header">' +
         '<div class="app-header-inner">' +
-          '<a class="brand" href="#" data-action="go-landing"><span class="brand-mark" aria-hidden="true">T</span><span class="brand-text">' + ST.esc(ST.negocio.nombre) + "</span></a>" +
+          '<a class="brand" href="#" data-action="go-landing"><span class="brand-text">' + ST.esc(ST.negocio.nombre) + "</span></a>" +
           '<button type="button" class="btn btn-ghost btn-sm" data-action="logout">Cerrar sesión</button>' +
         "</div>" +
         '<nav class="tabs" aria-label="Secciones de mi cuenta">' + tabsHtml + "</nav>" +
