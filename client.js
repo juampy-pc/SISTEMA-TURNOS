@@ -66,11 +66,11 @@
       '<section class="hero" id="inicio">' +
         '<div class="hero-inner">' +
           '<p class="eyebrow">Reservá online, sin llamadas ni esperas</p>' +
-          "<h1>Turnos simples, historial siempre a mano</h1>" +
-          '<p class="hero-lede">Elegí el servicio, el día y el horario que te quede mejor. Nosotros confirmamos tu turno y vos podés ver tus próximas citas y el detalle de tus tratamientos cuando quieras.</p>' +
+          "<h1>Estética Miriam García</h1>" +
+          '<p class="hero-lede">Años de experiencia en cosmetología, con matrícula profesional (MP 23639). Cuido la piel, las cejas y la mirada de cada clienta. Elegí el día y la hora que mejor te quede y pedí tu turno.</p>' +
           '<div class="hero-actions">' +
             '<a class="btn btn-primary" href="#reservar">Reservar turno</a>' +
-            '<a class="btn btn-ghost" href="#servicios">Ver servicios</a>' +
+            '<a class="btn btn-ghost" href="#trabajos">Ver mis trabajos</a>' +
           "</div>" +
         "</div>" +
       "</section>"
