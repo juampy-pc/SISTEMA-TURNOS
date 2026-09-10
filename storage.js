@@ -51,12 +51,18 @@ window.ST = (function () {
   }
 
   function timeSlots() {
+    // Turno mañana: 9:00 a 11:30. Turno tarde: 15:00 a 21:30.
     var out = [];
-    for (var h = 9; h <= 19; h++) {
-      ["00", "30"].forEach(function (m) {
-        if (!(h === 19 && m === "30")) out.push(pad2(h) + ":" + m);
-      });
+    function addRange(startH, startM, endH, endM) {
+      var h = startH, m = startM;
+      while (h < endH || (h === endH && m <= endM)) {
+        out.push(pad2(h) + ":" + pad2(m));
+        m += 30;
+        if (m >= 60) { m = 0; h++; }
+      }
     }
+    addRange(9, 0, 11, 30);
+    addRange(15, 0, 21, 30);
     return out;
   }
 
