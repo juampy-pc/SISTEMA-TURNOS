@@ -1,23 +1,15 @@
-/**
- * client.js
- * Sitio público: landing page, reserva de turnos, creación de cuenta,
- * inicio de sesión y panel privado del cliente (historial, próximos
- * turnos, tienda). Habla con la API real a través de storage.js — no
- * guarda nada directamente en el navegador, la sesión vive en una
- * cookie segura que pone el servidor.
- */
 (function () {
   "use strict";
   var ST = window.ST;
 
   var state = {
-    view: "cargando",       // cargando | landing | dashboard
-    dashboardTab: "inicio", // inicio | historial | agendar | tienda
+    view: "cargando",
+    dashboardTab: "inicio",
     showLogin: false,
-    loginMode: "login",     // login | register
+    loginMode: "login",
     loginError: "",
     registerModalError: "",
-    bookingStep: 1,          // 1 = datos del turno, 2 = crear contraseña
+    bookingStep: 1,
     bookingDraft: null,
     bookingBlocked: false,
     bookingError: "",
@@ -26,9 +18,12 @@
     busy: false
   };
 
-  /* ------------------------------------------------------------------ */
-  /* Vista: landing pública                                              */
-  /* ------------------------------------------------------------------ */
+  var galeriaState = { index: 0, interval: null };
+  var TRABAJOS = [
+    { archivo: "images/trabajo-labios.jpg", alt: "Antes y después de micropigmentación de labios", titulo: "Micropigmentación de labios", sub: "Antes y después" },
+    { archivo: "images/trabajo-cejas.jpg", alt: "Cejas efecto polvo y delineado inferior", titulo: "Cejas efecto polvo", sub: "Microblading + delineado inferior" },
+    { archivo: "images/trabajo-delineado.jpg", alt: "Delineado de ojos superior e inferior", titulo: "Delineado de ojos", sub: "Superior e inferior" }
+  ];
 
   function renderLanding() {
     return "" +
@@ -81,34 +76,36 @@
   }
 
   function renderServicios() {
-    var items = ST.TRATAMIENTOS.map(function (t) {
+    var filas = ST.TRATAMIENTOS.map(function (t, i) {
+      var destacado = i < 3;
       return (
-        '<li class="service-card">' +
-          "<h3>" + ST.esc(t) + "</h3>" +
-          "<p>Coordiná este servicio eligiendo el horario que prefieras en el formulario de reserva.</p>" +
+        '<li class="service-row' + (destacado ? " is-featured" : "") + '">' +
+          '<div>' +
+            (destacado ? '<span class="service-tag">Muy pedido</span>' : "") +
+            '<span class="service-name">' + ST.esc(t) + "</span>" +
+          "</div>" +
+          '<a href="#reservar" class="service-link">Reservar</a>' +
         "</li>"
       );
     }).join("");
 
     return (
       '<section class="section" id="servicios" aria-labelledby="servicios-titulo">' +
-        '<div class="section-inner">' +
+        '<div class="section-inner section-inner-narrow">' +
           '<h2 id="servicios-titulo">Servicios disponibles</h2>' +
           '<p class="section-lede">Este es el listado de servicios que se pueden reservar por el momento.</p>' +
-          '<ul class="service-grid">' + items + "</ul>" +
+          '<ul class="service-list">' + filas + "</ul>" +
         "</div>" +
       "</section>"
     );
   }
 
   function renderGaleria() {
-    var trabajos = [
-      { archivo: "images/trabajo-labios.jpg", alt: "Antes y después de micropigmentación de labios" },
-      { archivo: "images/trabajo-cejas.jpg", alt: "Microblading de cejas y delineado inferior" },
-      { archivo: "images/trabajo-delineado.jpg", alt: "Delineado de ojos realizado en el local" }
-    ];
-    var items = trabajos.map(function (t) {
-      return '<li class="gallery-item"><img src="' + t.archivo + '" alt="' + ST.esc(t.alt) + '" loading="lazy" width="700" height="700"></li>';
+    var slides = TRABAJOS.map(function (t, i) {
+      return '<img src="' + t.archivo + '" alt="' + ST.esc(t.alt) + '" class="foto-banner-slide' + (i === 0 ? " is-active" : "") + '" data-slide="' + i + '" loading="' + (i === 0 ? "eager" : "lazy") + '">';
+    }).join("");
+    var dots = TRABAJOS.map(function (t, i) {
+      return '<button type="button" class="foto-banner-dot' + (i === 0 ? " is-active" : "") + '" data-action="galeria-dot" data-index="' + i + '" aria-label="Ver foto ' + (i + 1) + '"></button>';
     }).join("");
 
     return (
@@ -116,14 +113,47 @@
         '<div class="section-inner">' +
           '<h2 id="trabajos-titulo">Trabajos realizados</h2>' +
           '<p class="section-lede">Algunos resultados reales de tratamientos hechos en el local.</p>' +
-          '<ul class="gallery-grid">' + items + "</ul>" +
+          '<div class="foto-banner" id="foto-banner">' +
+            '<div class="foto-banner-track">' + slides + "</div>" +
+            '<button type="button" class="foto-banner-arrow foto-banner-arrow-prev" data-action="galeria-prev" aria-label="Foto anterior">&lsaquo;</button>' +
+            '<button type="button" class="foto-banner-arrow foto-banner-arrow-next" data-action="galeria-next" aria-label="Foto siguiente">&rsaquo;</button>' +
+            '<div class="foto-banner-glass">' +
+              '<p class="foto-banner-title">' + ST.esc(TRABAJOS[0].titulo) + "</p>" +
+              '<p class="foto-banner-sub">' + ST.esc(TRABAJOS[0].sub) + "</p>" +
+              '<div class="foto-banner-dots">' + dots + "</div>" +
+            "</div>" +
+          "</div>" +
         "</div>" +
       "</section>"
     );
   }
 
+  function actualizarGaleriaDOM(index) {
+    var banner = document.getElementById("foto-banner");
+    if (!banner) return;
+    galeriaState.index = index;
+    var slides = banner.querySelectorAll(".foto-banner-slide");
+    for (var i = 0; i < slides.length; i++) slides[i].classList.toggle("is-active", i === index);
+    var dots = banner.querySelectorAll(".foto-banner-dot");
+    for (var j = 0; j < dots.length; j++) dots[j].classList.toggle("is-active", j === index);
+    var titleEl = banner.querySelector(".foto-banner-title");
+    var subEl = banner.querySelector(".foto-banner-sub");
+    if (titleEl) titleEl.textContent = TRABAJOS[index].titulo;
+    if (subEl) subEl.textContent = TRABAJOS[index].sub;
+  }
+
+  function iniciarGaleriaCarousel(resetIndex) {
+    if (galeriaState.interval) { clearInterval(galeriaState.interval); galeriaState.interval = null; }
+    var banner = document.getElementById("foto-banner");
+    if (!banner) return;
+    if (resetIndex) galeriaState.index = 0;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    galeriaState.interval = setInterval(function () {
+      actualizarGaleriaDOM((galeriaState.index + 1) % TRABAJOS.length);
+    }, 4500);
+  }
+
   function renderSobreEllocal() {
-    // TODO: reemplazar la dirección y el horario por los datos reales del local.
     return (
       '<section class="section" id="el-local" aria-labelledby="local-titulo">' +
         '<div class="section-inner">' +
@@ -234,7 +264,7 @@
         '<form data-form="registro-cliente" novalidate>' +
           '<div class="field"><label for="rg-nombre">Nombre y apellido</label><input id="rg-nombre" name="nombre" required></div>' +
           '<div class="field"><label for="rg-email">Email</label><input id="rg-email" name="email" type="email" required></div>' +
-          '<div class="field"><label for="rg-telefono">WhatsApp (opcional)</label><input id="rg-telefono" name="telefono" type="tel"></div>' +
+          '<div class="field"><label for="rg-telefono">WhatsApp</label><input id="rg-telefono" name="telefono" type="tel" required></div>' +
           '<div class="field"><label for="rg-clave">Contraseña</label><input id="rg-clave" name="clave" type="password" minlength="6" required autocomplete="new-password"></div>' +
           '<div class="field"><label for="rg-clave2">Repetir contraseña</label><input id="rg-clave2" name="clave2" type="password" minlength="6" required autocomplete="new-password"></div>' +
           (state.registerModalError ? '<p class="form-error">' + ST.esc(state.registerModalError) + "</p>" : "") +
@@ -265,10 +295,6 @@
   function renderFooter() {
     return '<footer class="site-footer"><p>' + ST.esc(ST.negocio.nombre) + " · [Dirección] · " + (ST.negocio.whatsapp ? ST.esc(ST.negocio.whatsapp) : "[Teléfono de contacto]") + "</p></footer>";
   }
-
-  /* ------------------------------------------------------------------ */
-  /* Vista: panel del cliente autenticado                                */
-  /* ------------------------------------------------------------------ */
 
   function renderDashboard() {
     var c = ST.currentUser;
@@ -426,10 +452,6 @@
     );
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Render principal                                                     */
-  /* ------------------------------------------------------------------ */
-
   function render() {
     var app = document.getElementById("app");
     if (state.view === "cargando") {
@@ -437,10 +459,10 @@
       return;
     }
     app.innerHTML = state.view === "dashboard" ? renderDashboard() : renderLanding();
+    if (state.view === "landing") iniciarGaleriaCarousel(true);
   }
 
   function showError(err) {
-    // Error de red genérico (servidor caído, sin conexión, etc.)
     alert((err && err.message) || "Ocurrió un error de conexión. Probá de nuevo.");
   }
 
@@ -452,10 +474,6 @@
     state.registerError = "";
     state.justBooked = false;
   }
-
-  /* ------------------------------------------------------------------ */
-  /* Eventos                                                              */
-  /* ------------------------------------------------------------------ */
 
   function onClick(e) {
     var el = e.target.closest("[data-action]");
@@ -474,6 +492,21 @@
     }
     else if (action === "dash-tab") { state.dashboardTab = el.dataset.tab; }
     else if (action === "booking-restart") { resetBooking(); }
+    else if (action === "galeria-prev") {
+      actualizarGaleriaDOM((galeriaState.index - 1 + TRABAJOS.length) % TRABAJOS.length);
+      iniciarGaleriaCarousel(false);
+      return;
+    }
+    else if (action === "galeria-next") {
+      actualizarGaleriaDOM((galeriaState.index + 1) % TRABAJOS.length);
+      iniciarGaleriaCarousel(false);
+      return;
+    }
+    else if (action === "galeria-dot") {
+      actualizarGaleriaDOM(Number(el.dataset.index));
+      iniciarGaleriaCarousel(false);
+      return;
+    }
     else return;
     render();
   }
@@ -586,10 +619,6 @@
 
   document.addEventListener("click", onClick);
   document.addEventListener("submit", onSubmit);
-
-  /* ------------------------------------------------------------------ */
-  /* Arranque: cargar info del negocio y ver si ya hay sesión activa      */
-  /* ------------------------------------------------------------------ */
 
   Promise.all([ST.cargarNegocio().catch(function () { return null; }), ST.me().catch(function () { return null; })])
     .then(function () {

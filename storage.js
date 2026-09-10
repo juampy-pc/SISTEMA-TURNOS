@@ -1,22 +1,16 @@
 /**
  * storage.js
  * Capa de datos compartida entre el sitio público (client.js) y el panel
- * de administración (admin.js). A diferencia de la versión anterior, ahora
- * habla con una API real (carpeta /api, funciones serverless de Vercel)
- * respaldada por una base de datos Postgres — no con localStorage.
- *
- * Todas las funciones que hacen red devuelven Promesas. Los llamadores
- * (client.js / admin.js) deben usar async/await o .then().
+ * de administración (admin.js). Habla con una API real (carpeta /api,
+ * funciones serverless de Vercel) respaldada por Postgres.
  */
 window.ST = (function () {
   "use strict";
 
-  /* ------------------------------------------------------------------ */
-  /* Configuración editable                                              */
-  /* ------------------------------------------------------------------ */
-
-  // Servicios reales según el folleto del local.
   var TRATAMIENTOS = [
+    "Micropigmentación de labios",
+    "Delineado superior e inferior",
+    "Cejas efecto polvo (microblading)",
     "Limpieza facial",
     "Depilación láser",
     "Radiofrecuencia",
@@ -24,25 +18,15 @@ window.ST = (function () {
     "Peeling",
     "Extracciones",
     "Hidralips (labios)",
-    "Microblading de cejas",
     "Diseño y perfilado de cejas con henna",
-    "Micropigmentación de labios",
     "Tratamiento de afecciones de la piel"
   ];
 
   var CATEGORIAS_PRODUCTO = ["General", "Cuidado facial", "Cuidado corporal"];
 
-  /* ------------------------------------------------------------------ */
-  /* Estado en memoria (caché local para renderizar sin pedir todo de nuevo) */
-  /* ------------------------------------------------------------------ */
-
   var DB = { clientes: [], turnos: [], productos: [], ventas: [] };
   var negocio = { nombre: "Sistema de Turnos", whatsapp: "" };
-  var currentUser = null; // { id, rol, nombre, telefono, email } | null
-
-  /* ------------------------------------------------------------------ */
-  /* Utilidades puras (sin red)                                           */
-  /* ------------------------------------------------------------------ */
+  var currentUser = null;
 
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
@@ -101,6 +85,23 @@ window.ST = (function () {
     return (!desde || fechaISO >= desde) && (!hasta || fechaISO <= hasta);
   }
 
+  function normalizarTelefonoAR(tel) {
+    var digits = String(tel || "").replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.indexOf("54") === 0) {
+      return digits.indexOf("549") === 0 ? digits : "549" + digits.slice(2);
+    }
+    if (digits.indexOf("0") === 0) digits = digits.slice(1);
+    if (digits.indexOf("15") === 0) digits = digits.slice(2);
+    return "549" + digits;
+  }
+
+  function waLink(telefono, mensaje) {
+    var num = normalizarTelefonoAR(telefono);
+    if (!num) return null;
+    return "https://wa.me/" + num + "?text=" + encodeURIComponent(mensaje);
+  }
+
   function clienteById(id) {
     for (var i = 0; i < DB.clientes.length; i++) if (DB.clientes[i].id === id) return DB.clientes[i];
     return null;
@@ -121,17 +122,11 @@ window.ST = (function () {
     return mismos.indexOf(turno) + 1;
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Traducción entre el formato de la base (snake_case) y el que usa    */
-  /* la interfaz (camelCase) — así el resto del código no cambia según   */
-  /* de dónde vengan los datos.                                          */
-  /* ------------------------------------------------------------------ */
-
   function mapTurno(row) {
     return {
       id: row.id, clienteId: row.cliente_id, clienteNombre: row.cliente_nombre,
       tratamiento: row.servicio, fecha: row.fecha, hora: row.hora,
-      estado: row.estado, notas: row.notas
+      estado: row.estado, notas: row.notas, recordatorioEnviado: !!row.recordatorio_enviado
     };
   }
   function mapProducto(row) {
@@ -152,16 +147,12 @@ window.ST = (function () {
     return { id: row.id, nombre: row.nombre, telefono: row.telefono, email: row.email };
   }
 
-  /* ------------------------------------------------------------------ */
-  /* Llamadas a la API                                                    */
-  /* ------------------------------------------------------------------ */
-
   function api(path, options) {
     options = options || {};
     var opts = {
       method: options.method || "GET",
       headers: { "Content-Type": "application/json" },
-      credentials: "same-origin" // envía y recibe la cookie de sesión
+      credentials: "same-origin"
     };
     if (options.body !== undefined) opts.body = JSON.stringify(options.body);
     return fetch(path, opts).then(function (res) {
@@ -176,7 +167,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- negocio (información pública) ---- */
   function cargarNegocio() {
     return api("/api/negocio").then(function (data) {
       negocio = data.negocio || negocio;
@@ -184,7 +174,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- sesión ---- */
   function me() {
     return api("/api/auth/me").then(function (data) {
       currentUser = data.usuario || null;
@@ -210,7 +199,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- turnos ---- */
   function cargarTurnos() {
     return api("/api/turnos").then(function (data) {
       DB.turnos = (data.turnos || []).map(mapTurno);
@@ -234,6 +222,7 @@ window.ST = (function () {
     if (cambios.tratamiento !== undefined) body.servicio = cambios.tratamiento;
     if (cambios.estado !== undefined) body.estado = cambios.estado;
     if (cambios.notas !== undefined) body.notas = cambios.notas;
+    if (cambios.recordatorioEnviado !== undefined) body.recordatorioEnviado = cambios.recordatorioEnviado;
     return api("/api/turnos/" + id, { method: "PATCH", body: body }).then(function (data) {
       var turno = mapTurno(data.turno);
       var idx = DB.turnos.findIndex(function (t) { return t.id === id; });
@@ -242,7 +231,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- productos ---- */
   function cargarProductos() {
     return api("/api/productos").then(function (data) {
       DB.productos = (data.productos || []).map(mapProducto);
@@ -270,7 +258,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- ventas ---- */
   function cargarVentas(desde, hasta) {
     var qs = [];
     if (desde) qs.push("desde=" + encodeURIComponent(desde));
@@ -294,7 +281,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- clientes (solo administrador) ---- */
   function cargarClientes() {
     return api("/api/clientes").then(function (data) {
       DB.clientes = (data.clientes || []).map(mapCliente);
@@ -302,7 +288,6 @@ window.ST = (function () {
     });
   }
 
-  /* ---- carga inicial combinada ---- */
   function cargarDatosAdmin() {
     return Promise.all([cargarTurnos(), cargarProductos(), cargarClientes(), cargarVentas()]);
   }
@@ -325,6 +310,7 @@ window.ST = (function () {
     catClass: catClass,
     addDays: addDays,
     enRango: enRango,
+    waLink: waLink,
     clienteById: clienteById,
     turnosDeCliente: turnosDeCliente,
     isFuturo: isFuturo,
