@@ -180,6 +180,7 @@
         '<div class="section-inner">' +
           '<h2 id="ubicacion-titulo">Cómo llegar</h2>' +
           '<p class="section-lede">Av. Alvear 4877, Fontana, Chaco.</p>' +
+          '<a class="btn btn-primary btn-sm" style="margin-bottom:16px;" href="https://wa.me/' + (ST.negocio.whatsapp || "") + '" target="_blank" rel="noopener">Escribinos por WhatsApp</a>' +
           '<div class="map-embed">' +
             '<iframe src="https://www.google.com/maps?q=Av.+Alvear+4877,+Fontana,+Chaco,+Argentina&output=embed" width="100%" height="320" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación de Miriam García Cosmetología en el mapa"></iframe>' +
           "</div>" +
@@ -309,7 +310,12 @@
   }
 
   function renderFooter() {
-    return '<footer class="site-footer"><p>' + ST.esc(ST.negocio.nombre) + " · Av. Alvear 4877, Fontana, Chaco · " + (ST.negocio.whatsapp ? ST.esc(ST.negocio.whatsapp) : "[Teléfono de contacto]") + "</p></footer>";
+    return (
+      '<footer class="site-footer"><p>' + ST.esc(ST.negocio.nombre) +
+      " · Av. Alvear 4877, Fontana, Chaco · " +
+      (ST.negocio.whatsapp ? ST.esc(ST.negocio.whatsapp) : "[Teléfono de contacto]") +
+      ' · <a href="https://instagram.com/Miriam_garcia567" target="_blank" rel="noopener">@Miriam_garcia567</a></p></footer>'
+    );
   }
 
   function renderDashboard() {
