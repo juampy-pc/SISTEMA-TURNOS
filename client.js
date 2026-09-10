@@ -314,7 +314,9 @@
       '<footer class="site-footer"><p>' + ST.esc(ST.negocio.nombre) +
       " · Av. Alvear 4877, Fontana, Chaco · " +
       (ST.negocio.whatsapp ? ST.esc(ST.negocio.whatsapp) : "[Teléfono de contacto]") +
-      ' · <a href="https://instagram.com/Miriam_garcia567" target="_blank" rel="noopener">@Miriam_garcia567</a></p></footer>'
+      ' · <a href="https://instagram.com/Miriam_garcia567" target="_blank" rel="noopener">@Miriam_garcia567</a></p>' +
+      '<p class="footer-credit">Impulsado por SMZ Labs</p>' +
+      "</footer>"
     );
   }
 

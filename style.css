@@ -358,3 +358,5 @@ img,svg{max-width:100%;display:block;}
 
 .map-embed{border-radius:var(--radius-card);overflow:hidden;border:1px solid var(--line);margin-top:22px;}
 .map-embed iframe{display:block;width:100%;height:320px;}
+
+.footer-credit{font-size:11.5px;color:var(--grey);margin-top:6px;}

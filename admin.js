@@ -76,7 +76,8 @@
         "</div>" +
         '<nav class="tabs" aria-label="Secciones del panel">' + tabsHtml + "</nav>" +
       "</header>" +
-      '<main id="contenido-principal" class="content">' + body + "</main>"
+      '<main id="contenido-principal" class="content">' + body + "</main>" +
+      '<footer class="admin-footer"><p class="footer-credit">Impulsado por SMZ Labs</p></footer>'
     );
   }
 
