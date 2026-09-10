@@ -163,7 +163,7 @@
           '<div class="info-grid">' +
             '<div class="info-card"><h3>Profesional</h3><p>Miriam García · Cosmetóloga matriculada (MP 23639)</p></div>' +
             '<div class="info-card"><h3>Dirección</h3><p>Av. Alvear 4877, Fontana, Chaco</p></div>' +
-            '<div class="info-card"><h3>Horarios</h3><p>[Completar días y horario de atención]</p></div>' +
+            '<div class="info-card"><h3>Horarios</h3><p>Lunes a sábado<br>Mañana: 9:00 a 11:30 hs<br>Tarde: 15:00 a 21:30 hs</p></div>' +
             '<div class="info-card"><h3>Contacto</h3><p>' +
               (ST.negocio.whatsapp ? "WhatsApp: " + ST.esc(ST.negocio.whatsapp) : "[Completar WhatsApp de contacto]") +
               '<br>Instagram: <a href="https://instagram.com/Miriam_garcia567" target="_blank" rel="noopener">@Miriam_garcia567</a>' +
