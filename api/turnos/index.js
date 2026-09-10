@@ -34,11 +34,17 @@ module.exports = async function handler(req, res) {
         res.status(400).json({ error: "Faltan datos del turno." });
         return;
       }
-      // Un cliente solo puede crear turnos para sí mismo. Un admin puede
-      // asignarlo a un cliente con cuenta (clienteId) o a un nombre suelto
-      // (clienteNombre), para turnos cargados a mano sin cuenta online.
       const clienteId = user.rol === "admin" ? (body.clienteId || null) : user.id;
       const clienteNombre = user.rol === "admin" ? (body.clienteNombre || null) : null;
+
+      const choque = await queryOne(
+        "select id from turnos where negocio_id = $1 and fecha = $2 and hora = $3 and estado != 'cancelado' limit 1",
+        [negocio.id, fecha, hora]
+      );
+      if (choque) {
+        res.status(409).json({ error: "Ese horario ya está ocupado. Elegí otro." });
+        return;
+      }
 
       const turno = await queryOne(
         "insert into turnos (negocio_id, cliente_id, cliente_nombre, servicio, fecha, hora, estado, notas) " +
@@ -47,6 +53,10 @@ module.exports = async function handler(req, res) {
       );
       res.status(200).json({ turno: turno });
     } catch (err) {
+      if (err && err.code === "23505") {
+        res.status(409).json({ error: "Ese horario ya está ocupado. Elegí otro." });
+        return;
+      }
       console.error("Error en POST /api/turnos:", err);
       res.status(500).json({ error: "Error del servidor." });
     }

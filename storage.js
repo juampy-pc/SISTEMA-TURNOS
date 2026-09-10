@@ -287,6 +287,12 @@ window.ST = (function () {
     });
   }
 
+  function horariosOcupados(fecha) {
+    return api("/api/turnos/ocupados?fecha=" + encodeURIComponent(fecha)).then(function (data) {
+      return data.horas || [];
+    });
+  }
+
   function cargarClientes() {
     return api("/api/clientes").then(function (data) {
       DB.clientes = (data.clientes || []).map(mapCliente);
@@ -336,6 +342,7 @@ window.ST = (function () {
     cargarVentas: cargarVentas,
     crearVenta: crearVenta,
     eliminarVenta: eliminarVenta,
+    horariosOcupados: horariosOcupados,
     cargarClientes: cargarClientes,
     cargarDatosAdmin: cargarDatosAdmin,
     cargarDatosCliente: cargarDatosCliente

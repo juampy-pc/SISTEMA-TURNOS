@@ -250,7 +250,7 @@
         '<form data-form="solicitar-turno" novalidate>' +
           '<div class="field"><label for="b-tratamiento">Servicio</label><select id="b-tratamiento" name="tratamiento" required>' + opciones + "</select></div>" +
           '<div class="field-row">' +
-            '<div class="field"><label for="b-fecha">Fecha</label><input id="b-fecha" type="date" name="fecha" min="' + ST.todayISO() + '" value="' + ST.esc(draft.fecha || "") + '" required></div>' +
+            '<div class="field"><label for="b-fecha">Fecha</label><input id="b-fecha" type="date" name="fecha" min="' + ST.todayISO() + '" value="' + ST.esc(draft.fecha || "") + '" data-fecha-turno="b-hora" required></div>' +
             '<div class="field"><label for="b-hora">Horario</label><select id="b-hora" name="hora" required>' + horas + "</select></div>" +
           "</div>" +
           '<div class="field"><label for="b-nombre">Nombre y apellido</label><input id="b-nombre" name="nombre" value="' + ST.esc(draft.nombre || "") + '" required></div>' +
@@ -438,7 +438,7 @@
         '<form data-form="agendar-turno-logueado" novalidate>' +
           '<div class="field"><label for="a-tratamiento">Servicio</label><select id="a-tratamiento" name="tratamiento" required>' + opciones + "</select></div>" +
           '<div class="field-row">' +
-            '<div class="field"><label for="a-fecha">Fecha</label><input id="a-fecha" type="date" name="fecha" min="' + ST.todayISO() + '" required></div>' +
+            '<div class="field"><label for="a-fecha">Fecha</label><input id="a-fecha" type="date" name="fecha" min="' + ST.todayISO() + '" data-fecha-turno="a-hora" required></div>' +
             '<div class="field"><label for="a-hora">Horario</label><select id="a-hora" name="hora" required>' + horas + "</select></div>" +
           "</div>" +
           '<div class="field"><label for="a-nota">Nota (opcional)</label><textarea id="a-nota" name="nota"></textarea></div>' +
@@ -631,8 +631,15 @@
         })
         .catch(function (err) {
           state.busy = false;
-          if (err.status === 409) { state.bookingBlocked = true; }
-          else { state.registerError = err.message; }
+          if (err.status === 409 && /horario/i.test(err.message || "")) {
+            state.bookingStep = 1;
+            state.bookingError = err.message;
+            state.registerError = "";
+          } else if (err.status === 409) {
+            state.bookingBlocked = true;
+          } else {
+            state.registerError = err.message;
+          }
           render();
         });
       return;
@@ -653,6 +660,32 @@
 
   document.addEventListener("click", onClick);
   document.addEventListener("submit", onSubmit);
+
+  document.addEventListener("change", function (e) {
+    var el = e.target;
+    if (!el.matches || !el.matches("[data-fecha-turno]")) return;
+    var horaSelect = document.getElementById(el.dataset.fechaTurno);
+    if (!horaSelect) return;
+    var fecha = el.value;
+    var valorPrevio = horaSelect.value;
+    if (!fecha) return;
+    horaSelect.disabled = true;
+    horaSelect.innerHTML = '<option value="">Buscando horarios…</option>';
+    ST.horariosOcupados(fecha).then(function (ocupados) {
+      var libres = ST.timeSlots().filter(function (h) { return ocupados.indexOf(h) === -1; });
+      if (!libres.length) {
+        horaSelect.innerHTML = '<option value="">Sin horarios disponibles ese día</option>';
+        horaSelect.disabled = true;
+        return;
+      }
+      horaSelect.innerHTML = libres.map(function (h) { return '<option value="' + h + '">' + h + ' hs</option>'; }).join("");
+      if (libres.indexOf(valorPrevio) !== -1) horaSelect.value = valorPrevio;
+      horaSelect.disabled = false;
+    }).catch(function () {
+      horaSelect.innerHTML = ST.timeSlots().map(function (h) { return '<option value="' + h + '">' + h + ' hs</option>'; }).join("");
+      horaSelect.disabled = false;
+    });
+  });
 
   Promise.all([ST.cargarNegocio().catch(function () { return null; }), ST.me().catch(function () { return null; })])
     .then(function () {
