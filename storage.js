@@ -15,14 +15,19 @@ window.ST = (function () {
   /* Configuración editable                                              */
   /* ------------------------------------------------------------------ */
 
-  // TODO: ajustar esta lista a los servicios reales que se ofrecen.
+  // Servicios reales según el folleto del local.
   var TRATAMIENTOS = [
-    "Consulta inicial",
-    "Tratamiento facial",
-    "Tratamiento corporal",
-    "Depilación",
-    "Masajes",
-    "Otro"
+    "Limpieza facial",
+    "Depilación láser",
+    "Radiofrecuencia",
+    "Punta de diamante",
+    "Peeling",
+    "Extracciones",
+    "Hidralips (labios)",
+    "Microblading de cejas",
+    "Diseño y perfilado de cejas con henna",
+    "Micropigmentación de labios",
+    "Tratamiento de afecciones de la piel"
   ];
 
   var CATEGORIAS_PRODUCTO = ["General", "Cuidado facial", "Cuidado corporal"];

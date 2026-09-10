@@ -37,6 +37,7 @@
       '<main id="contenido-principal">' +
         renderHero() +
         renderServicios() +
+        renderGaleria() +
         renderSobreEllocal() +
         renderReserva() +
       "</main>" +
@@ -53,6 +54,7 @@
           "</a>" +
           '<nav class="site-nav" aria-label="Navegación principal">' +
             '<a href="#servicios">Servicios</a>' +
+            '<a href="#trabajos">Trabajos</a>' +
             '<a href="#el-local">El local</a>' +
             '<a href="#reservar" class="site-nav-cta">Reservar turno</a>' +
             '<button type="button" class="btn btn-ghost btn-sm" data-action="open-login">Ingresar</button>' +
@@ -99,16 +101,41 @@
     );
   }
 
-  function renderSobreEllocal() {
-    // TODO: reemplazar estos datos por la información real del local.
+  function renderGaleria() {
+    var trabajos = [
+      { archivo: "images/trabajo-labios.jpg", alt: "Antes y después de micropigmentación de labios" },
+      { archivo: "images/trabajo-cejas.jpg", alt: "Microblading de cejas y delineado inferior" },
+      { archivo: "images/trabajo-delineado.jpg", alt: "Delineado de ojos realizado en el local" }
+    ];
+    var items = trabajos.map(function (t) {
+      return '<li class="gallery-item"><img src="' + t.archivo + '" alt="' + ST.esc(t.alt) + '" loading="lazy" width="700" height="700"></li>';
+    }).join("");
+
     return (
-      '<section class="section section-muted" id="el-local" aria-labelledby="local-titulo">' +
+      '<section class="section section-muted" id="trabajos" aria-labelledby="trabajos-titulo">' +
+        '<div class="section-inner">' +
+          '<h2 id="trabajos-titulo">Trabajos realizados</h2>' +
+          '<p class="section-lede">Algunos resultados reales de tratamientos hechos en el local.</p>' +
+          '<ul class="gallery-grid">' + items + "</ul>" +
+        "</div>" +
+      "</section>"
+    );
+  }
+
+  function renderSobreEllocal() {
+    // TODO: reemplazar la dirección y el horario por los datos reales del local.
+    return (
+      '<section class="section" id="el-local" aria-labelledby="local-titulo">' +
         '<div class="section-inner">' +
           '<h2 id="local-titulo">Sobre el local</h2>' +
           '<div class="info-grid">' +
+            '<div class="info-card"><h3>Profesional</h3><p>Miriam García · Cosmetóloga matriculada (MP 23639)</p></div>' +
             '<div class="info-card"><h3>Dirección</h3><p>[Completar dirección del local]</p></div>' +
             '<div class="info-card"><h3>Horarios</h3><p>[Completar días y horario de atención]</p></div>' +
-            '<div class="info-card"><h3>Contacto</h3><p>' + (ST.negocio.whatsapp ? "WhatsApp: " + ST.esc(ST.negocio.whatsapp) : "[Completar teléfono / WhatsApp de contacto]") + "</p></div>" +
+            '<div class="info-card"><h3>Contacto</h3><p>' +
+              (ST.negocio.whatsapp ? "WhatsApp: " + ST.esc(ST.negocio.whatsapp) : "[Completar WhatsApp de contacto]") +
+              '<br>Instagram: <a href="https://instagram.com/Miriam_garcia567" target="_blank" rel="noopener">@Miriam_garcia567</a>' +
+            "</p></div>" +
           "</div>" +
         "</div>" +
       "</section>"
