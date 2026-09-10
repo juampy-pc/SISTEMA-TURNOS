@@ -78,14 +78,10 @@
   }
 
   function renderServicios() {
-    var filas = ST.TRATAMIENTOS.map(function (t, i) {
-      var destacado = i < 3;
+    var cards = ST.TRATAMIENTOS.map(function (t) {
       return (
-        '<li class="service-row' + (destacado ? " is-featured" : "") + '">' +
-          '<div>' +
-            (destacado ? '<span class="service-tag">Muy pedido</span>' : "") +
-            '<span class="service-name">' + ST.esc(t) + "</span>" +
-          "</div>" +
+        '<li class="service-card">' +
+          '<span class="service-name">' + ST.esc(t) + "</span>" +
           '<a href="#reservar" class="service-link">Reservar</a>' +
         "</li>"
       );
@@ -93,10 +89,14 @@
 
     return (
       '<section class="section" id="servicios" aria-labelledby="servicios-titulo">' +
-        '<div class="section-inner section-inner-narrow">' +
+        '<div class="section-inner">' +
           '<h2 id="servicios-titulo">Servicios disponibles</h2>' +
-          '<p class="section-lede">Este es el listado de servicios que se pueden reservar por el momento.</p>' +
-          '<ul class="service-list">' + filas + "</ul>" +
+          '<p class="section-lede">Deslizá para ver todos los servicios.</p>' +
+          '<div class="service-carousel-wrap">' +
+            '<button type="button" class="service-arrow service-arrow-prev" data-action="servicios-prev" aria-label="Servicios anteriores">&lsaquo;</button>' +
+            '<ul class="service-carousel" id="service-carousel">' + cards + "</ul>" +
+            '<button type="button" class="service-arrow service-arrow-next" data-action="servicios-next" aria-label="Más servicios">&rsaquo;</button>' +
+          "</div>" +
         "</div>" +
       "</section>"
     );
@@ -521,6 +521,16 @@
     else if (action === "galeria-dot") {
       actualizarGaleriaDOM(Number(el.dataset.index));
       iniciarGaleriaCarousel(false);
+      return;
+    }
+    else if (action === "servicios-prev") {
+      var carPrev = document.getElementById("service-carousel");
+      if (carPrev) carPrev.scrollBy({ left: -232, behavior: "smooth" });
+      return;
+    }
+    else if (action === "servicios-next") {
+      var carNext = document.getElementById("service-carousel");
+      if (carNext) carNext.scrollBy({ left: 232, behavior: "smooth" });
       return;
     }
     else return;
