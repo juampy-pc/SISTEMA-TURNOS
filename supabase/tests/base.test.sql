@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(30);
+select plan(33);
 
 create function public.test_roles() returns jsonb language sql as $$
   select '[
@@ -10,12 +10,13 @@ create function public.test_roles() returns jsonb language sql as $$
   ]'::jsonb
 $$;
 
--- Usuarios: A dueña de barberia-uno, B dueño de cancha-b, E empleado de A, C empleado de B
+-- Usuarios: A dueña de barberia-uno, B dueño de cancha-b, E empleado de A, C empleado de B, D sin negocio
 insert into auth.users (id, instance_id, aud, role, email) values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a@test.com'),
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'b@test.com'),
   ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'e@test.com'),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'c@test.com');
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'c@test.com'),
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'd@test.com');
 
 -- slug_disponible (1-4)
 select ok(public.slug_disponible('mi-cancha'), 'un slug libre y válido está disponible');
@@ -102,6 +103,14 @@ select throws_ok($$update public.miembros set rol_id = current_setting('t.rol_b'
 select throws_ok($$update public.miembros set rol_id = current_setting('t.rol_dueno_b')::uuid where usuario = 'juan'$$, '23503', null, 'no se puede asignar el rol dueño de otro negocio');
 reset role;
 
+-- A (dueña) no puede ascender a un empleado al rol Dueño de su propio negocio
+reset role;
+select set_config('t.rol_dueno_a', (select r.id::text from public.roles r join public.negocios n on n.id = r.negocio_id where n.slug = 'barberia-uno' and r.es_dueno), true);
+select set_config('request.jwt.claims', '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}', true);
+set local role authenticated;
+select throws_ok($$update public.miembros set rol_id = current_setting('t.rol_dueno_a')::uuid where usuario = 'juan'$$, '42501', null, 'no se puede ascender a un empleado al rol dueño del propio negocio');
+reset role;
+
 -- A desactiva a E; E pierde acceso (26-27)
 select set_config('request.jwt.claims', '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}', true);
 set local role authenticated;
@@ -110,6 +119,18 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee","role":"authenticated"}', true);
 set local role authenticated;
 select is((select count(*)::int from public.negocios), 0, 'un empleado desactivado no ve ningún dato');
+
+-- D (sin negocio): slug reservado y slug mal formado
+reset role;
+select set_config('request.jwt.claims', '{"sub":"dddddddd-dddd-dddd-dddd-dddddddddddd","role":"authenticated"}', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.crear_negocio('Panel', 'panel', 'cancha', false, 'fijo', 'Dani', public.test_roles())$$,
+  'P0001', 'slug_reservado', 'crear_negocio rechaza un slug reservado');
+select throws_ok(
+  $$select public.crear_negocio('Mayus', 'Mayus', 'cancha', false, 'fijo', 'Dani', public.test_roles())$$,
+  '23514', null, 'crear_negocio rechaza un slug mal formado');
+reset role;
 
 select * from finish();
 rollback;

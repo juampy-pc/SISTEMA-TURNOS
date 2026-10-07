@@ -46,3 +46,7 @@ describe('SLUGS_RESERVADOS', () => {
     }
   });
 });
+
+test('esSlugValido rechaza caracteres no ASCII', () => {
+  expect(esSlugValido('cañá')).toBe(false);
+});
