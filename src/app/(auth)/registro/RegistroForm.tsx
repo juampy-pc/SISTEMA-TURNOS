@@ -12,6 +12,10 @@ const boton = 'rounded-lg bg-stone-900 px-4 py-2 text-white disabled:opacity-50'
 export default function RegistroForm() {
   const [estado, accion, pendiente] = useActionState(registrar, inicial);
   const [paso, setPaso] = useState(1);
+  const [estadoVisto, setEstadoVisto] = useState(estado);
+  const [nombreDueno, setNombreDueno] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [tipo, setTipo] = useState<TipoNegocio>('peluqueria');
   const [nombreNegocio, setNombreNegocio] = useState('');
   const [slug, setSlug] = useState('');
@@ -19,6 +23,12 @@ export default function RegistroForm() {
   const [slugOk, setSlugOk] = useState<boolean | null>(null);
   const [vende, setVende] = useState(PLANTILLAS.peluqueria.vendeProductosSugerido);
   const [modo, setModo] = useState<ModoTurnos>(PLANTILLAS.peluqueria.modoTurnosSugerido);
+  // Al volver un error, ir al paso que tiene el problema (ajuste de estado durante el render).
+  if (estado !== estadoVisto) {
+    setEstadoVisto(estado);
+    if (estado.error) setPaso(estado.paso ?? 3);
+  }
+
   const formRef = useRef<HTMLFormElement>(null);
 
   const consulta = useRef(0);
@@ -60,17 +70,27 @@ export default function RegistroForm() {
   return (
     <form ref={formRef} action={accion} className="space-y-6">
       <p className="text-sm text-stone-500">Paso {paso} de 3</p>
+      {estado.error && <p role="alert" className="text-red-700">{estado.error}</p>}
 
       <fieldset data-paso="1" hidden={paso !== 1} className="space-y-4">
         <legend className="mb-2 text-lg font-semibold">Tu cuenta</legend>
         <label className="block">Tu nombre
-          <input name="nombreDueno" required minLength={2} maxLength={80} className={input} />
+          <input
+            name="nombreDueno" required minLength={2} maxLength={80} className={input}
+            value={nombreDueno} onChange={(e) => setNombreDueno(e.target.value)}
+          />
         </label>
         <label className="block">Email
-          <input name="email" type="email" required className={input} />
+          <input
+            name="email" type="email" required className={input}
+            value={email} onChange={(e) => setEmail(e.target.value)}
+          />
         </label>
         <label className="block">Contraseña
-          <input name="password" type="password" required minLength={8} maxLength={72} className={input} />
+          <input
+            name="password" type="password" required minLength={8} maxLength={72} className={input}
+            value={password} onChange={(e) => setPassword(e.target.value)}
+          />
         </label>
         <button type="button" onClick={() => siguiente(1)} className={boton}>Siguiente</button>
       </fieldset>
@@ -137,7 +157,6 @@ export default function RegistroForm() {
           <input type="radio" name="modoTurnos" value="editable" checked={modo === 'editable'} onChange={() => setModo('editable')} />
           Turnos editables (según el servicio)
         </label>
-        {estado.error && <p role="alert" className="text-red-700">{estado.error}</p>}
         <div className="flex gap-3">
           <button type="button" onClick={() => setPaso(2)} className="rounded-lg border border-stone-300 px-4 py-2">Atrás</button>
           <button type="submit" disabled={pendiente} className={boton}>Crear mi negocio</button>
