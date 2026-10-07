@@ -1,7 +1,6 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
 import { ROLES_POR_DEFECTO } from '@/lib/dominio/permisos';
 import { registroSchema } from '@/lib/dominio/esquemas';
 import { esSlugValido } from '@/lib/dominio/slug';
@@ -47,7 +46,7 @@ export async function registrar(_: EstadoRegistro, formData: FormData): Promise<
   });
   if (!parsed.success) {
     const campo = String(parsed.error.issues[0]?.path[0] ?? '');
-    return { error: z.prettifyError(parsed.error), paso: PASO_POR_CAMPO[campo] ?? 3 };
+    return { error: parsed.error.issues[0]?.message ?? 'Revisá los datos ingresados.', paso: PASO_POR_CAMPO[campo] ?? 3 };
   }
   const d = parsed.data;
 
