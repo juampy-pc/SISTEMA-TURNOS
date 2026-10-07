@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { empleadoSchema, registroSchema } from './esquemas';
+import { empleadoSchema, loginDuenoSchema, loginEmpleadoSchema, registroSchema } from './esquemas';
 
 const registroValido = {
   email: 'ana@example.com',
@@ -85,5 +85,25 @@ describe('empleadoSchema', () => {
     ['rol que no es uuid', { rolId: 'no-uuid' }],
   ])('rechaza %s', (_, cambio) => {
     expect(empleadoSchema.safeParse({ ...valido, ...cambio }).success).toBe(false);
+  });
+});
+
+
+describe('esquemas de login', () => {
+  test('normaliza email del dueño', () => {
+    const r = loginDuenoSchema.safeParse({ email: '  A@B.com ', password: 'x' });
+    expect(r.success && r.data.email).toBe('a@b.com');
+  });
+  test('rechaza email inválido o contraseña vacía', () => {
+    expect(loginDuenoSchema.safeParse({ email: 'nope', password: 'x' }).success).toBe(false);
+    expect(loginDuenoSchema.safeParse({ email: 'a@b.com', password: '' }).success).toBe(false);
+  });
+  test('normaliza usuario y código del empleado', () => {
+    const r = loginEmpleadoSchema.safeParse({ usuario: ' Ana.Lopez ', codigo: ' Mi-Negocio ', password: 'x' });
+    expect(r.success && [r.data.usuario, r.data.codigo]).toEqual(['ana.lopez', 'mi-negocio']);
+  });
+  test('rechaza usuario o código inválidos', () => {
+    expect(loginEmpleadoSchema.safeParse({ usuario: 'a', codigo: 'mi-negocio', password: 'x' }).success).toBe(false);
+    expect(loginEmpleadoSchema.safeParse({ usuario: 'ana', codigo: 'A B', password: 'x' }).success).toBe(false);
   });
 });

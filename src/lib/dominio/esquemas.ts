@@ -42,3 +42,23 @@ export const empleadoSchema = z.object({
   password: passwordSchema,
   rolId: z.uuid('Elegí un rol.'),
 });
+
+const passwordLogin = z.string().min(1).max(200);
+
+export const loginDuenoSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+  password: passwordLogin,
+});
+
+export const loginEmpleadoSchema = z.object({
+  usuario: z
+    .string()
+    .transform(normalizarUsuario)
+    .refine((u) => USUARIO_REGEX.test(u)),
+  codigo: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .refine((s) => esSlugValido(s)),
+  password: passwordLogin,
+});
