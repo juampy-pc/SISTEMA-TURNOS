@@ -46,6 +46,14 @@ describe('registroSchema: mensajes en español', () => {
     expect(mensajes({ slug: 'mal slug' })).toEqual(['El link solo admite minúsculas, números y guiones (3 a 40 caracteres).']);
   });
 
+  test('tipo, vendeProductos y modoTurnos inválidos tienen mensaje en español', () => {
+    expect(mensajes({ tipo: 'gimnasio' })).toEqual(['Elegí un tipo de negocio.']);
+    expect(mensajes({ tipo: null })).toEqual(['Elegí un tipo de negocio.']);
+    expect(mensajes({ vendeProductos: 'si' })).toEqual(['Indicá si vendés productos.']);
+    expect(mensajes({ modoTurnos: 'libre' })).toEqual(['Elegí cómo son tus turnos.']);
+    expect(mensajes({ modoTurnos: null })).toEqual(['Elegí cómo son tus turnos.']);
+  });
+
   test('nombres vacíos o fuera de rango tienen mensaje en español', () => {
     expect(mensajes({ nombreDueno: ' ' })).toEqual(['Ingresá tu nombre.']);
     expect(mensajes({ nombreDueno: 'A' })).toEqual(['El nombre debe tener entre 2 y 80 caracteres.']);

@@ -28,9 +28,9 @@ export const registroSchema = z.object({
       ctx.addIssue({ code: 'custom', message: 'El link solo admite minúsculas, números y guiones (3 a 40 caracteres).' });
     }
   }),
-  tipo: z.enum(TIPOS_NEGOCIO),
-  vendeProductos: z.boolean(),
-  modoTurnos: z.enum(['fijo', 'editable']),
+  tipo: z.enum(TIPOS_NEGOCIO, { error: 'Elegí un tipo de negocio.' }),
+  vendeProductos: z.boolean({ error: 'Indicá si vendés productos.' }),
+  modoTurnos: z.enum(['fijo', 'editable'], { error: 'Elegí cómo son tus turnos.' }),
 });
 
 export const empleadoSchema = z.object({
