@@ -27,9 +27,15 @@ export async function proxy(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
 
+  // Usuario baneado (empleado desactivado): getUser falla y la cookie sigue ahí. /salir la borra y
+  // muestra el aviso; /salir no pasa por este proxy, así que no hay bucle de redirecciones.
+  if (!user && error?.code === 'user_banned' && pathname.startsWith('/panel')) {
+    return redirigir(request, '/salir', respuesta);
+  }
   if (!user && pathname.startsWith('/panel')) return redirigir(request, '/login', respuesta);
   if (user && (pathname === '/login' || pathname === '/registro')) return redirigir(request, '/panel', respuesta);
   return respuesta;
