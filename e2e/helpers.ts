@@ -10,21 +10,30 @@ function env(nombre: string): string {
   return linea.slice(nombre.length + 1).trim();
 }
 
-async function rest(ruta: string): Promise<unknown[]> {
+async function pedir<T>(ruta: string): Promise<T> {
   const key = env('SUPABASE_SERVICE_ROLE_KEY');
   const res = await fetch(`${env('NEXT_PUBLIC_SUPABASE_URL')}${ruta}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
   });
-  return (await res.json()) as unknown[];
+  if (!res.ok) throw new Error(`GET ${ruta} falló: ${res.status} ${await res.text()}`);
+  return (await res.json()) as T;
 }
 
 export async function negociosConSlug(slug: string): Promise<number> {
-  return (await rest(`/rest/v1/negocios?select=id&slug=eq.${encodeURIComponent(slug)}`)).length;
+  const filas = await pedir<unknown[]>(`/rest/v1/negocios?select=id&slug=eq.${encodeURIComponent(slug)}`);
+  return filas.length;
 }
 
 export async function usuariosConEmail(email: string): Promise<number> {
-  const res = (await rest('/auth/v1/admin/users?per_page=1000')) as unknown as { users?: { email: string }[] };
-  return (res.users ?? []).filter((u) => u.email === email).length;
+  const porPagina = 200;
+  let cantidad = 0;
+  for (let pagina = 1; ; pagina++) {
+    const { users } = await pedir<{ users: { email?: string }[] }>(
+      `/auth/v1/admin/users?page=${pagina}&per_page=${porPagina}`,
+    );
+    cantidad += users.filter((u) => u.email === email).length;
+    if (users.length < porPagina) return cantidad;
+  }
 }
 
 export interface Cuenta {
