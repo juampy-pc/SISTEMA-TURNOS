@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { empleadoSchema, loginDuenoSchema, loginEmpleadoSchema, registroSchema } from './esquemas';
+import { emailInterno } from './empleados';
 
 const registroValido = {
   email: 'ana@example.com',
@@ -105,5 +106,26 @@ describe('esquemas de login', () => {
   test('rechaza usuario o código inválidos', () => {
     expect(loginEmpleadoSchema.safeParse({ usuario: 'a', codigo: 'mi-negocio', password: 'x' }).success).toBe(false);
     expect(loginEmpleadoSchema.safeParse({ usuario: 'ana', codigo: 'A B', password: 'x' }).success).toBe(false);
+  });
+});
+
+describe('emails internos de empleados', () => {
+  const interno = emailInterno('ana', 'mi-negocio');
+
+  test('registro rechaza el dominio interno con el mensaje en español', () => {
+    const r = registroSchema.safeParse({ ...registroValido, email: interno });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe('Ingresá un email válido.');
+  });
+
+  test('login de dueño rechaza el dominio interno', () => {
+    const r = loginDuenoSchema.safeParse({ email: interno.toUpperCase(), password: 'x' });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe('Ingresá un email válido.');
+  });
+
+  test('un email normal sigue pasando', () => {
+    expect(registroSchema.safeParse({ ...registroValido, email: 'dueno@gmail.com' }).success).toBe(true);
+    expect(loginDuenoSchema.safeParse({ email: 'dueno@gmail.com', password: 'x' }).success).toBe(true);
   });
 });

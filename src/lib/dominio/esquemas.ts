@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { normalizarUsuario, USUARIO_REGEX } from './empleados';
+import { normalizarUsuario, SUFIJO_EMAIL_INTERNO, USUARIO_REGEX } from './empleados';
 import { TIPOS_NEGOCIO } from './plantillas';
 import { esSlugValido, SLUGS_RESERVADOS } from './slug';
 
@@ -11,13 +11,16 @@ const texto = (etiqueta: string, min: number, max: number, vacio: string) =>
     .min(min, `El ${etiqueta} debe tener entre ${min} y ${max} caracteres.`)
     .max(max, `El ${etiqueta} debe tener entre ${min} y ${max} caracteres.`);
 
+const MSG_EMAIL = 'Ingresá un email válido.';
+const noEsEmailInterno = (e: string) => !e.toLowerCase().endsWith(SUFIJO_EMAIL_INTERNO);
+
 export const passwordSchema = z
   .string()
   .min(8, 'La contraseña debe tener al menos 8 caracteres.')
   .max(72, 'La contraseña no puede superar los 72 caracteres.');
 
 export const registroSchema = z.object({
-  email: z.email('Ingresá un email válido.').max(254),
+  email: z.email(MSG_EMAIL).max(254).refine(noEsEmailInterno, MSG_EMAIL),
   password: passwordSchema,
   nombreDueno: texto('nombre', 2, 80, 'Ingresá tu nombre.'),
   nombreNegocio: texto('nombre del negocio', 2, 80, 'Ingresá el nombre del negocio.'),
@@ -46,7 +49,7 @@ export const empleadoSchema = z.object({
 const passwordLogin = z.string().min(1).max(200);
 
 export const loginDuenoSchema = z.object({
-  email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+  email: z.string().trim().toLowerCase().pipe(z.email(MSG_EMAIL).max(254).refine(noEsEmailInterno, MSG_EMAIL)),
   password: passwordLogin,
 });
 

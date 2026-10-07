@@ -6,6 +6,8 @@ export function normalizarUsuario(valor: string): string {
 
 // Los empleados no tienen email real: Supabase Auth necesita uno, así que se
 // deriva del usuario y del slug del negocio. El dominio .invalid nunca resuelve.
+export const SUFIJO_EMAIL_INTERNO = '.staff.sistema-turnos.invalid';
+
 export function emailInterno(usuario: string, slug: string): string {
-  return `${usuario}@${slug}.staff.sistema-turnos.invalid`;
+  return `${usuario}@${slug}${SUFIJO_EMAIL_INTERNO}`;
 }
