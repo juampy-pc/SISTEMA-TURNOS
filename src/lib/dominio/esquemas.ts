@@ -1,9 +1,15 @@
 import { z } from 'zod';
 import { normalizarUsuario, USUARIO_REGEX } from './empleados';
 import { TIPOS_NEGOCIO } from './plantillas';
-import { esSlugValido } from './slug';
+import { esSlugValido, SLUGS_RESERVADOS } from './slug';
 
-const texto = (min: number, max: number) => z.string().trim().min(min).max(max);
+const texto = (etiqueta: string, min: number, max: number, vacio: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, { error: vacio, abort: true })
+    .min(min, `El ${etiqueta} debe tener entre ${min} y ${max} caracteres.`)
+    .max(max, `El ${etiqueta} debe tener entre ${min} y ${max} caracteres.`);
 
 export const passwordSchema = z
   .string()
@@ -13,16 +19,22 @@ export const passwordSchema = z
 export const registroSchema = z.object({
   email: z.email('Ingresá un email válido.').max(254),
   password: passwordSchema,
-  nombreDueno: texto(2, 80),
-  nombreNegocio: texto(2, 80),
-  slug: z.string().refine(esSlugValido, 'El link solo admite minúsculas, números y guiones (3 a 40 caracteres).'),
+  nombreDueno: texto('nombre', 2, 80, 'Ingresá tu nombre.'),
+  nombreNegocio: texto('nombre del negocio', 2, 80, 'Ingresá el nombre del negocio.'),
+  slug: z.string().superRefine((slug, ctx) => {
+    if ((SLUGS_RESERVADOS as readonly string[]).includes(slug)) {
+      ctx.addIssue({ code: 'custom', message: 'Ese link está reservado, elegí otro.' });
+    } else if (!esSlugValido(slug)) {
+      ctx.addIssue({ code: 'custom', message: 'El link solo admite minúsculas, números y guiones (3 a 40 caracteres).' });
+    }
+  }),
   tipo: z.enum(TIPOS_NEGOCIO),
   vendeProductos: z.boolean(),
   modoTurnos: z.enum(['fijo', 'editable']),
 });
 
 export const empleadoSchema = z.object({
-  nombre: texto(2, 80),
+  nombre: texto('nombre', 2, 80, 'Ingresá el nombre.'),
   usuario: z
     .string()
     .transform(normalizarUsuario)

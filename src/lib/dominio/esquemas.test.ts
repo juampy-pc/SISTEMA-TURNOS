@@ -31,6 +31,31 @@ describe('registroSchema', () => {
   });
 });
 
+describe('registroSchema: mensajes en español', () => {
+  const mensajes = (cambio: Record<string, unknown>) => {
+    const r = registroSchema.safeParse({ ...registroValido, ...cambio });
+    return r.success ? [] : r.error.issues.map((i) => i.message);
+  };
+
+  test('un slug reservado se rechaza con mensaje claro', () => {
+    expect(mensajes({ slug: 'panel' })).toEqual(['Ese link está reservado, elegí otro.']);
+    expect(mensajes({ slug: 'b' })).toEqual(['Ese link está reservado, elegí otro.']);
+  });
+
+  test('un slug inválido (no reservado) mantiene su mensaje', () => {
+    expect(mensajes({ slug: 'mal slug' })).toEqual(['El link solo admite minúsculas, números y guiones (3 a 40 caracteres).']);
+  });
+
+  test('nombres vacíos o fuera de rango tienen mensaje en español', () => {
+    expect(mensajes({ nombreDueno: ' ' })).toEqual(['Ingresá tu nombre.']);
+    expect(mensajes({ nombreDueno: 'A' })).toEqual(['El nombre debe tener entre 2 y 80 caracteres.']);
+    expect(mensajes({ nombreDueno: 'a'.repeat(81) })).toEqual(['El nombre debe tener entre 2 y 80 caracteres.']);
+    expect(mensajes({ nombreNegocio: '' })).toEqual(['Ingresá el nombre del negocio.']);
+    expect(mensajes({ nombreNegocio: 'A' })).toEqual(['El nombre del negocio debe tener entre 2 y 80 caracteres.']);
+    expect(mensajes({ nombreNegocio: 'a'.repeat(81) })).toEqual(['El nombre del negocio debe tener entre 2 y 80 caracteres.']);
+  });
+});
+
 describe('empleadoSchema', () => {
   const valido = {
     nombre: 'Juan Pérez',

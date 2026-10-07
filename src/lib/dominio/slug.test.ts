@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { esSlugValido, slugify } from './slug';
+import { esSlugValido, SLUGS_RESERVADOS, slugify } from './slug';
 
 describe('slugify', () => {
   test('pasa a minúsculas, saca tildes y reemplaza símbolos por guiones', () => {
@@ -31,6 +31,18 @@ describe('esSlugValido', () => {
   test('rechaza mayúsculas, espacios, guiones dobles o en los extremos y largos fuera de rango', () => {
     for (const malo of ['Mi-Cancha', 'mi cancha', 'mi--cancha', '-mi', 'mi-', 'ab', 'a'.repeat(41), '']) {
       expect(esSlugValido(malo)).toBe(false);
+    }
+  });
+});
+
+describe('SLUGS_RESERVADOS', () => {
+  test('coincide con la lista de la base (private.slugs_reservados)', () => {
+    expect(SLUGS_RESERVADOS).toEqual(['panel', 'login', 'registro', 'salir', 'api', 'b', 'admin', 'app', 'www', 'static', 'assets', 'soporte']);
+  });
+
+  test('esSlugValido rechaza todos los slugs reservados', () => {
+    for (const reservado of SLUGS_RESERVADOS) {
+      expect(esSlugValido(reservado)).toBe(false);
     }
   });
 });
