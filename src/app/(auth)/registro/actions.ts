@@ -110,6 +110,9 @@ async function limpiar(
     await supabase?.auth.signOut();
   } catch {}
   try {
-    await admin.auth.admin.deleteUser(userId);
-  } catch {}
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (error) console.error('No se pudo borrar el usuario de Auth huérfano', userId, error.message);
+  } catch (e) {
+    console.error('No se pudo borrar el usuario de Auth huérfano', userId, e);
+  }
 }

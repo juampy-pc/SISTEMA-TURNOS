@@ -31,8 +31,11 @@ function uuid(valor: FormDataEntryValue | null): string {
 
 async function borrarUsuario(admin: ReturnType<typeof crearClienteAdmin>, userId: string) {
   try {
-    await admin.auth.admin.deleteUser(userId);
-  } catch {}
+    const { error } = await admin.auth.admin.deleteUser(userId);
+    if (error) console.error('No se pudo borrar el usuario de Auth huérfano', userId, error.message);
+  } catch (e) {
+    console.error('No se pudo borrar el usuario de Auth huérfano', userId, e);
+  }
 }
 
 export async function crearEmpleado(formData: FormData) {

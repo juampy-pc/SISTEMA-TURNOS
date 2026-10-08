@@ -16,7 +16,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <h1 className="text-lg font-semibold">{ctx.negocio.nombre}</h1>
           </div>
           <form action={cerrarSesion}>
-            <button className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm">Salir</button>
+            <button className="min-h-11 rounded-lg border border-stone-300 px-3 py-1.5 text-sm">Salir</button>
           </form>
         </div>
         <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2">

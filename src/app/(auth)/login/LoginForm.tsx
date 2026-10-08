@@ -29,25 +29,25 @@ export default function LoginForm({ aviso }: { aviso?: string }) {
 
       {modo === 'dueno' ? (
         <label className="block">Email
-          <input name="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
+          <input name="email" type="email" autoComplete="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
         </label>
       ) : (
         <>
           <label className="block">Usuario
-            <input name="usuario" required value={usuario} onChange={(e) => setUsuario(e.target.value)} className={input} autoCapitalize="none" />
+            <input name="usuario" autoComplete="username" required value={usuario} onChange={(e) => setUsuario(e.target.value)} className={input} autoCapitalize="none" />
           </label>
           <label className="block">Código del negocio
-            <input name="codigo" required value={codigo} onChange={(e) => setCodigo(e.target.value)} className={input} autoCapitalize="none" />
+            <input name="codigo" autoComplete="organization" required value={codigo} onChange={(e) => setCodigo(e.target.value)} className={input} autoCapitalize="none" />
           </label>
         </>
       )}
       <label className="block">Contraseña
-        <input name="password" type="password" required className={input} />
+        <input name="password" type="password" autoComplete="current-password" required className={input} />
       </label>
 
       {aviso && <p role="status" className="text-amber-700">{aviso}</p>}
       {estado.error && <p role="alert" className="text-red-700">{estado.error}</p>}
-      <button type="submit" disabled={pendiente} className="rounded-lg bg-stone-900 px-4 py-2 text-white disabled:opacity-50">
+      <button type="submit" disabled={pendiente} className="min-h-11 rounded-lg bg-stone-900 px-4 py-2 text-white disabled:opacity-50">
         Entrar
       </button>
     </form>

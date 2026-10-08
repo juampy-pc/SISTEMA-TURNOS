@@ -36,13 +36,16 @@ export const obtenerContexto = cache(async (): Promise<Contexto> => {
   if (!user) redirect('/login');
 
   // RLS devuelve vacío si el miembro está desactivado o no existe.
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('miembros')
     .select(
       'id, nombre, usuario, activo, negocio:negocios(id, slug, nombre, tipo, vende_productos, modo_turnos), rol:roles(id, nombre, es_dueno, permisos)',
     )
     .eq('auth_user_id', user.id)
     .maybeSingle();
+
+  // Un error de la base (red, timeout) no es lo mismo que "sin acceso": no se cierra la sesión.
+  if (error) throw new Error(`No se pudo cargar el contexto del panel: ${error.message}`);
 
   const fila = data as unknown as FilaContexto | null;
   if (!fila || !fila.activo || !fila.negocio || !fila.rol) redirect('/salir');
