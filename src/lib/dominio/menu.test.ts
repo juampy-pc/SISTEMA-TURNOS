@@ -6,6 +6,8 @@ describe('itemsDeMenu', () => {
     const hrefs = itemsDeMenu({ es_dueno: true, permisos: {} }).map((i) => i.href);
     expect(hrefs).toEqual([
       '/panel',
+      '/panel/turnos',
+      '/panel/clientes',
       '/panel/servicios',
       '/panel/recursos',
       '/panel/horarios',
@@ -20,7 +22,7 @@ describe('itemsDeMenu', () => {
 
   test('un empleado no ve Empleados', () => {
     const hrefs = itemsDeMenu({ es_dueno: false, permisos: { gestionar_turnos: true } }).map((i) => i.href);
-    expect(hrefs).toEqual(['/panel']);
+    expect(hrefs).toEqual(['/panel', '/panel/turnos']);
   });
 
   test('un ítem con permiso solo aparece para quien lo tiene', () => {

@@ -9,6 +9,8 @@ export interface ItemMenu {
 
 export const ITEMS_MENU: ItemMenu[] = [
   { href: '/panel', etiqueta: 'Inicio' },
+  { href: '/panel/turnos', etiqueta: 'Turnos', permiso: 'gestionar_turnos' },
+  { href: '/panel/clientes', etiqueta: 'Clientes', permiso: 'gestionar_clientes' },
   { href: '/panel/servicios', etiqueta: 'Servicios', permiso: 'gestionar_servicios' },
   { href: '/panel/recursos', etiqueta: 'Recursos', permiso: 'gestionar_servicios' },
   { href: '/panel/horarios', etiqueta: 'Horarios', permiso: 'gestionar_servicios' },
