@@ -59,6 +59,8 @@ export async function llenarHastaPaso3(page: Page, cuenta: Cuenta, nombreNegocio
 export async function registrarNegocio(page: Page, cuenta: Cuenta, nombreNegocio: string, slug: string) {
   await llenarHastaPaso3(page, cuenta, nombreNegocio, slug);
   await page.getByRole('button', { name: 'Crear mi negocio' }).click();
+  await expect(page).toHaveURL(/\/panel\/primeros-pasos$/);
+  await page.getByRole('link', { name: 'Prefiero cargarlo yo' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 }
 

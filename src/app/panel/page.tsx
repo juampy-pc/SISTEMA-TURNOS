@@ -11,8 +11,20 @@ export default async function InicioPage() {
   let pasos: ReturnType<typeof pasosIniciales> = [];
   if (ctx.rol.es_dueno) {
     const supabase = await crearClienteServidor();
-    const { count } = await supabase.from('miembros').select('id', { count: 'exact', head: true });
-    pasos = pasosIniciales({ cantidadMiembros: count ?? 1 });
+    const contar = async (tabla: 'miembros' | 'servicios' | 'recursos' | 'horarios') => {
+      const { count } = await supabase.from(tabla).select('id', { count: 'exact', head: true });
+      return count ?? 0;
+    };
+    const [cantidadMiembros, cantidadServicios, cantidadRecursos, cantidadHorarios] = await Promise.all([
+      contar('miembros'),
+      contar('servicios'),
+      contar('recursos'),
+      contar('horarios'),
+    ]);
+    pasos = pasosIniciales(
+      { cantidadMiembros: cantidadMiembros || 1, cantidadServicios, cantidadRecursos, cantidadHorarios },
+      plantilla.recurso,
+    );
   }
 
   return (

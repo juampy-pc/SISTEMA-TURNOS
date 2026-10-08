@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(31);
 
 create function public.test_roles() returns jsonb language sql as $$
   select '[
@@ -102,6 +102,23 @@ select set_config('request.jwt.claims', '{"sub":"eeeeeeee-eeee-eeee-eeee-eeeeeee
 set local role authenticated;
 select is((select count(*)::int from public.servicios), 0, 'un empleado desactivado no ve servicios');
 reset role;
+
+-- sembrar_plantilla (26-31): C dueño de un negocio nuevo; E (A) sin permiso
+insert into auth.users (id, instance_id, aud, role, email) values
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'c@test.com');
+select set_config('request.jwt.claims', '{"sub":"cccccccc-cccc-cccc-cccc-cccccccccccc","role":"authenticated"}', true);
+set local role authenticated;
+select public.crear_negocio('Estética C', 'estetica-c', 'estetica', false, 'editable', 'Cami', public.test_roles());
+select lives_ok($$select public.sembrar_plantilla('["Profesional 1","Profesional 2"]'::jsonb,
+  '[{"nombre":"Limpieza","duracion_min":60,"precio":0},{"nombre":"Depilación","duracion_min":30,"precio":5000}]'::jsonb,
+  '{1,2,3}', 540, 1080)$$, 'el dueño carga la plantilla');
+select is((select count(*)::int from public.recursos), 2, 'se crearon los recursos');
+select is((select count(*)::int from public.recurso_servicio), 4, 'cada recurso hace todos los servicios');
+select is((select count(*)::int from public.horarios), 6, 'una franja por día y recurso');
+select throws_ok($$select public.sembrar_plantilla('["X1"]'::jsonb, '[]'::jsonb, '{1}', 540, 600)$$, 'P0001', 'ya_configurado', 'no se puede cargar dos veces');
+reset role;
+-- Un negocio ya configurado de otro (A) no se ve afectado por C
+select is((select count(*)::int from public.recursos where negocio_id = current_setting('t.neg_a')::uuid), 1, 'la plantilla de C no toca el negocio A');
 
 select * from finish();
 rollback;

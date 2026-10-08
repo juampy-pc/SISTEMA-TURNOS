@@ -222,6 +222,9 @@ isOneToOne: false
             "crear_negocio":
 { Args: { "p_modo_turnos": string,"p_nombre": string,"p_nombre_dueno": string,"p_roles": Json,"p_slug": string,"p_tipo": string,"p_vende_productos": boolean }; Returns: string
                            },
+"sembrar_plantilla":
+{ Args: { "p_desde_min": number,"p_dias": (number)[],"p_hasta_min": number,"p_recursos": Json,"p_servicios": Json }; Returns: undefined
+                           },
 "slug_disponible":
 { Args: { "p_slug": string }; Returns: boolean
                            }

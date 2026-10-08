@@ -97,7 +97,7 @@ export async function registrar(_: EstadoRegistro, formData: FormData): Promise<
     return { error: 'No pudimos crear tu cuenta. Probá de nuevo.', paso: 3 };
   }
 
-  redirect('/panel');
+  redirect('/panel/primeros-pasos');
 }
 
 // Nunca deja un usuario de Auth huérfano: cada paso se intenta aunque el anterior falle.

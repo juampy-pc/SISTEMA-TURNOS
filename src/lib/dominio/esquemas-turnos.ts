@@ -27,8 +27,11 @@ const hora = z.string().transform((s, ctx) => {
   return m ?? 0;
 });
 
+// <input type="time"> no admite 24:00: un cierre a las 23:59 significa "hasta medianoche".
+const horaCierre = hora.transform((m) => (m === 1439 ? 1440 : m));
+
 export const franjaSchema = z
-  .object({ dia_semana: z.coerce.number().int().min(0).max(6), desde: hora, hasta: hora })
+  .object({ dia_semana: z.coerce.number().int().min(0).max(6), desde: hora, hasta: horaCierre })
   .refine((f) => f.hasta > f.desde, {
     message: 'La hora de cierre tiene que ser posterior a la de apertura.',
   })

@@ -30,6 +30,7 @@ describe('franjaSchema', () => {
     expect(franjaSchema.parse({ dia_semana: '1', desde: '09:00', hasta: '13:00' })).toEqual({
       dia_semana: 1, desde_min: 540, hasta_min: 780,
     });
+    expect(franjaSchema.parse({ dia_semana: '1', desde: '16:00', hasta: '23:59' }).hasta_min).toBe(1440);
     expect(franjaSchema.safeParse({ dia_semana: '1', desde: '13:00', hasta: '09:00' }).success).toBe(false);
     expect(franjaSchema.safeParse({ dia_semana: '7', desde: '09:00', hasta: '10:00' }).success).toBe(false);
   });

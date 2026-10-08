@@ -38,6 +38,8 @@ test('el dueño registra su negocio y llega al panel', async ({ page }) => {
   await page.getByLabel('Turnos editables (según el servicio)').check();
   await page.getByRole('button', { name: 'Crear mi negocio' }).click();
 
+  await expect(page).toHaveURL(/\/panel\/primeros-pasos$/);
+  await page.getByRole('link', { name: 'Prefiero cargarlo yo' }).click();
   await expect(page).toHaveURL(/\/panel$/);
   await expect(page.getByRole('heading', { name: 'Barbería E2E' })).toBeVisible();
   await expect(page.getByText('Primeros pasos')).toBeVisible();
@@ -96,6 +98,8 @@ test('registro con un link que se ocupa a último momento: avisa, conserva los d
   await expect(page.getByText('Disponible', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Siguiente' }).click();
   await page.getByRole('button', { name: 'Crear mi negocio' }).click();
+  await expect(page).toHaveURL(/\/panel\/primeros-pasos$/);
+  await page.getByRole('link', { name: 'Prefiero cargarlo yo' }).click();
   await expect(page).toHaveURL(/\/panel$/);
   await expect(page.getByRole('heading', { name: 'Negocio Carrera' })).toBeVisible();
   expect(await negociosConSlug(slugLibre)).toBe(1);
