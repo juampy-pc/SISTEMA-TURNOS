@@ -49,6 +49,26 @@ isOneToOne: false
       referencedColumns: ["id","negocio_id"]
     }
                   ]
+                },"clientes": {
+                  Row: {
+                    "created_at": string,"id": string,"negocio_id": string,"nombre": string,"notas": string,"telefono": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"negocio_id": string,"nombre": string,"notas"?: string,"telefono": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"negocio_id"?: string,"nombre"?: string,"notas"?: string,"telefono"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "clientes_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"horarios": {
                   Row: {
                     "desde_min": number,"dia_semana": number,"hasta_min": number,"id": string,"negocio_id": string,"recurso_id": string
@@ -213,6 +233,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"turnos": {
+                  Row: {
+                    "cliente_id": string,"created_at": string,"estado": string,"fin": string,"id": string,"inicio": string,"monto_cobrado": number | null,"negocio_id": string,"nota_cliente": string,"notas": string,"recurso_id": string,"servicio_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cliente_id": string,"created_at"?: string,"estado"?: string,"fin": string,"id"?: string,"inicio": string,"monto_cobrado"?: number | null,"negocio_id": string,"nota_cliente"?: string,"notas"?: string,"recurso_id": string,"servicio_id": string
+                  }
+                  Update: {
+                    "cliente_id"?: string,"created_at"?: string,"estado"?: string,"fin"?: string,"id"?: string,"inicio"?: string,"monto_cobrado"?: number | null,"negocio_id"?: string,"nota_cliente"?: string,"notas"?: string,"recurso_id"?: string,"servicio_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "turnos_cliente_id_negocio_id_fkey"
+      columns: ["cliente_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "clientes"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "turnos_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "turnos_recurso_id_negocio_id_fkey"
+      columns: ["recurso_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "recursos"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "turnos_servicio_id_negocio_id_fkey"
+      columns: ["servicio_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "servicios"
+      referencedColumns: ["id","negocio_id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -222,11 +280,19 @@ isOneToOne: false
             "crear_negocio":
 { Args: { "p_modo_turnos": string,"p_nombre": string,"p_nombre_dueno": string,"p_roles": Json,"p_slug": string,"p_tipo": string,"p_vende_productos": boolean }; Returns: string
                            },
+"huecos_disponibles":
+{ Args: { "p_fecha": string,"p_recurso": string,"p_servicio": string }; Returns: {
+              "fin": string,"inicio": string
+            }[]
+                           },
 "sembrar_plantilla":
 { Args: { "p_desde_min": number,"p_dias": (number)[],"p_hasta_min": number,"p_recursos": Json,"p_servicios": Json }; Returns: undefined
                            },
 "slug_disponible":
 { Args: { "p_slug": string }; Returns: boolean
+                           },
+"unir_clientes":
+{ Args: { "p_destino": string,"p_origen": string }; Returns: undefined
                            }
           }
           Enums: {
