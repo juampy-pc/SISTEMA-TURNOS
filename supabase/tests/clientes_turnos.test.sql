@@ -35,12 +35,12 @@ select set_config('t.neg_b', (select id::text from public.negocios where slug = 
 select set_config('t.fecha', (current_date + 3)::text, true);
 
 insert into public.recursos (negocio_id, nombre, miembro_id)
-  select current_setting('t.neg_a')::uuid, 'Sillón 1', (select id from public.miembros where usuario = 'pablo');
+  select current_setting('t.neg_a')::uuid, 'Sillón 1', (select id from public.miembros where usuario = 'pablo' and negocio_id = current_setting('t.neg_a')::uuid);
 insert into public.recursos (negocio_id, nombre) values (current_setting('t.neg_a')::uuid, 'Sillón 2');
 insert into public.servicios (negocio_id, nombre, duracion_min, precio) values (current_setting('t.neg_a')::uuid, 'Corte', 30, 8000);
-select set_config('t.r1', (select id::text from public.recursos where nombre = 'Sillón 1'), true);
-select set_config('t.r2', (select id::text from public.recursos where nombre = 'Sillón 2'), true);
-select set_config('t.srv', (select id::text from public.servicios where nombre = 'Corte'), true);
+select set_config('t.r1', (select id::text from public.recursos where nombre = 'Sillón 1' and negocio_id = current_setting('t.neg_a')::uuid), true);
+select set_config('t.r2', (select id::text from public.recursos where nombre = 'Sillón 2' and negocio_id = current_setting('t.neg_a')::uuid), true);
+select set_config('t.srv', (select id::text from public.servicios where nombre = 'Corte' and negocio_id = current_setting('t.neg_a')::uuid), true);
 insert into public.recurso_servicio (negocio_id, recurso_id, servicio_id)
   values (current_setting('t.neg_a')::uuid, current_setting('t.r1')::uuid, current_setting('t.srv')::uuid),
          (current_setting('t.neg_a')::uuid, current_setting('t.r2')::uuid, current_setting('t.srv')::uuid);
@@ -50,8 +50,8 @@ insert into public.horarios (negocio_id, recurso_id, dia_semana, desde_min, hast
 insert into public.clientes (negocio_id, nombre, telefono) values
   (current_setting('t.neg_a')::uuid, 'Carla', '+5491144445555'),
   (current_setting('t.neg_a')::uuid, 'Carla Dup', '+5491144445556');
-select set_config('t.c1', (select id::text from public.clientes where nombre = 'Carla'), true);
-select set_config('t.c2', (select id::text from public.clientes where nombre = 'Carla Dup'), true);
+select set_config('t.c1', (select id::text from public.clientes where nombre = 'Carla' and negocio_id = current_setting('t.neg_a')::uuid), true);
+select set_config('t.c2', (select id::text from public.clientes where nombre = 'Carla Dup' and negocio_id = current_setting('t.neg_a')::uuid), true);
 select set_config('t.h10', ((current_setting('t.fecha')::date)::timestamp + interval '10 hours') at time zone 'America/Argentina/Buenos_Aires' || '', true);
 
 -- Disponibilidad y exclusión (A, dueña) (1-12)
@@ -153,7 +153,7 @@ select is((select count(*)::int from public.turnos where cliente_id = current_se
 select is((select notas from public.clientes where id = current_setting('t.c1')::uuid), 'Prefiere tarde', 'las notas se conservan');
 reset role;
 -- Desactivado (P)
-update public.miembros set activo = false where usuario = 'pablo';
+update public.miembros set activo = false where usuario = 'pablo' and negocio_id = current_setting('t.neg_a')::uuid;
 select set_config('request.jwt.claims', '{"sub":"eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee","role":"authenticated"}', true);
 set local role authenticated;
 select is((select count(*)::int from public.turnos) + (select count(*)::int from public.clientes), 0, 'un empleado desactivado no ve turnos ni clientes');

@@ -46,6 +46,8 @@ export async function unirClientes(formData: FormData) {
   await exigirClientes(volver);
   const destino = leerUuid(destinoCrudo, () => volver('error', 'Solicitud inválida.'));
   const origen = leerUuid(formData.get('origenId'), () => volver('error', 'Solicitud inválida.'));
+  if (origen === destino) volver('error', 'Solicitud inválida.');
+  // El aislamiento entre negocios lo exige la función en la base (security definer + mi_negocio_id).
   const supabase = await crearClienteServidor();
   const { error } = await supabase.rpc('unir_clientes', { p_origen: origen, p_destino: destino });
   if (error) volver('error', 'No se pudieron unir los clientes.');
