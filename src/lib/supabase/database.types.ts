@@ -23,7 +23,59 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "miembros": {
+            "bloqueos": {
+                  Row: {
+                    "desde": string,"hasta": string,"id": string,"motivo": string,"negocio_id": string,"recurso_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "desde": string,"hasta": string,"id"?: string,"motivo"?: string,"negocio_id": string,"recurso_id"?: string | null
+                  }
+                  Update: {
+                    "desde"?: string,"hasta"?: string,"id"?: string,"motivo"?: string,"negocio_id"?: string,"recurso_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "bloqueos_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "bloqueos_recurso_id_negocio_id_fkey"
+      columns: ["recurso_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "recursos"
+      referencedColumns: ["id","negocio_id"]
+    }
+                  ]
+                },"horarios": {
+                  Row: {
+                    "desde_min": number,"dia_semana": number,"hasta_min": number,"id": string,"negocio_id": string,"recurso_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "desde_min": number,"dia_semana": number,"hasta_min": number,"id"?: string,"negocio_id": string,"recurso_id": string
+                  }
+                  Update: {
+                    "desde_min"?: number,"dia_semana"?: number,"hasta_min"?: number,"id"?: string,"negocio_id"?: string,"recurso_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "horarios_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "horarios_recurso_id_negocio_id_fkey"
+      columns: ["recurso_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "recursos"
+      referencedColumns: ["id","negocio_id"]
+    }
+                  ]
+                },"miembros": {
                   Row: {
                     "activo": boolean,"auth_user_id": string,"created_at": string,"id": string,"negocio_id": string,"nombre": string,"rol_id": string,"usuario": string
                   }
@@ -51,17 +103,75 @@ isOneToOne: false
                   ]
                 },"negocios": {
                   Row: {
-                    "created_at": string,"id": string,"modo_turnos": string,"nombre": string,"slug": string,"tipo": string,"vende_productos": boolean,"zona_horaria": string
+                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"zona_horaria": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"modo_turnos": string,"nombre": string,"slug": string,"tipo": string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"zona_horaria"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"modo_turnos"?: string,"nombre"?: string,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"zona_horaria"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"recurso_servicio": {
+                  Row: {
+                    "negocio_id": string,"recurso_id": string,"servicio_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "negocio_id": string,"recurso_id": string,"servicio_id": string
+                  }
+                  Update: {
+                    "negocio_id"?: string,"recurso_id"?: string,"servicio_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recurso_servicio_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "recurso_servicio_recurso_id_negocio_id_fkey"
+      columns: ["recurso_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "recursos"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "recurso_servicio_servicio_id_negocio_id_fkey"
+      columns: ["servicio_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "servicios"
+      referencedColumns: ["id","negocio_id"]
+    }
+                  ]
+                },"recursos": {
+                  Row: {
+                    "activo": boolean,"created_at": string,"id": string,"miembro_id": string | null,"negocio_id": string,"nombre": string,"orden": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "activo"?: boolean,"created_at"?: string,"id"?: string,"miembro_id"?: string | null,"negocio_id": string,"nombre": string,"orden"?: number
+                  }
+                  Update: {
+                    "activo"?: boolean,"created_at"?: string,"id"?: string,"miembro_id"?: string | null,"negocio_id"?: string,"nombre"?: string,"orden"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recursos_miembro_id_negocio_id_fkey"
+      columns: ["miembro_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "miembros"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "recursos_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"roles": {
                   Row: {
@@ -77,6 +187,26 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "roles_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"servicios": {
+                  Row: {
+                    "activo": boolean,"created_at": string,"duracion_min": number,"id": string,"negocio_id": string,"nombre": string,"precio": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "activo"?: boolean,"created_at"?: string,"duracion_min": number,"id"?: string,"negocio_id": string,"nombre": string,"precio"?: number
+                  }
+                  Update: {
+                    "activo"?: boolean,"created_at"?: string,"duracion_min"?: number,"id"?: string,"negocio_id"?: string,"nombre"?: string,"precio"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "servicios_negocio_id_fkey"
       columns: ["negocio_id"]
 isOneToOne: false
       referencedRelation: "negocios"
