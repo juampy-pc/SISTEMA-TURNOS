@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { servicioSchema } from './esquemas-turnos';
 import { esTipoNegocio, plantillaDe, PLANTILLAS, TIPOS_NEGOCIO } from './plantillas';
 
 describe('plantillas', () => {
@@ -27,5 +28,20 @@ describe('plantillas', () => {
     expect(esTipoNegocio('cancha')).toBe(true);
     expect(esTipoNegocio('gimnasio')).toBe(false);
     expect(esTipoNegocio(undefined)).toBe(false);
+  });
+
+  test('cada plantilla trae datos de ejemplo válidos', () => {
+    for (const tipo of TIPOS_NEGOCIO) {
+      const { ejemplo } = plantillaDe(tipo);
+      expect(ejemplo.recursos.length).toBeGreaterThanOrEqual(1);
+      expect(ejemplo.servicios.length).toBeGreaterThanOrEqual(1);
+      for (const s of ejemplo.servicios) expect(servicioSchema.safeParse(s).success).toBe(true);
+      expect(ejemplo.horario.hasta_min).toBeGreaterThan(ejemplo.horario.desde_min);
+      expect(ejemplo.horario.dias.length).toBeGreaterThan(0);
+    }
+  });
+
+  test('las canchas arrancan con un servicio de una hora (grilla fija)', () => {
+    expect(PLANTILLAS.cancha.ejemplo.servicios.some((s) => s.duracion_min === 60)).toBe(true);
   });
 });

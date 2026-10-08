@@ -10,6 +10,13 @@ export interface Plantilla {
   modoTurnosSugerido: ModoTurnos;
   vendeProductosSugerido: boolean;
   tips: string[];
+  ejemplo: EjemploPlantilla;
+}
+
+export interface EjemploPlantilla {
+  recursos: string[];
+  servicios: { nombre: string; duracion_min: number; precio: number }[];
+  horario: { dias: number[]; desde_min: number; hasta_min: number };
 }
 
 export const PLANTILLAS: Record<TipoNegocio, Plantilla> = {
@@ -25,6 +32,11 @@ export const PLANTILLAS: Record<TipoNegocio, Plantilla> = {
       'Con turnos fijos armás una grilla (por ejemplo, de una hora) y evitás superposiciones.',
       'Si vendés bebidas o accesorios, activá el catálogo para controlar el stock.',
     ],
+    ejemplo: {
+      recursos: ['Cancha 1', 'Cancha 2'],
+      servicios: [{ nombre: 'Alquiler 1 hora', duracion_min: 60, precio: 0 }],
+      horario: { dias: [1, 2, 3, 4, 5, 6, 0], desde_min: 960, hasta_min: 1440 },
+    },
   },
   peluqueria: {
     tipo: 'peluqueria',
@@ -38,6 +50,14 @@ export const PLANTILLAS: Record<TipoNegocio, Plantilla> = {
       'Cargá tus servicios con duración y precio: el sistema calcula los horarios libres.',
       'Creá usuarios para tu equipo desde Empleados y elegí qué puede ver cada uno.',
     ],
+    ejemplo: {
+      recursos: ['Profesional 1'],
+      servicios: [
+        { nombre: 'Corte', duracion_min: 30, precio: 0 },
+        { nombre: 'Corte y barba', duracion_min: 45, precio: 0 },
+      ],
+      horario: { dias: [1, 2, 3, 4, 5, 6], desde_min: 540, hasta_min: 1080 },
+    },
   },
   estetica: {
     tipo: 'estetica',
@@ -51,6 +71,14 @@ export const PLANTILLAS: Record<TipoNegocio, Plantilla> = {
       'Sumá a cada profesional o cabina como recurso para que el cliente elija.',
       'Si vendés cosmética, activá el catálogo y llevá el stock en un solo lugar.',
     ],
+    ejemplo: {
+      recursos: ['Profesional 1'],
+      servicios: [
+        { nombre: 'Limpieza facial', duracion_min: 60, precio: 0 },
+        { nombre: 'Depilación', duracion_min: 30, precio: 0 },
+      ],
+      horario: { dias: [1, 2, 3, 4, 5, 6], desde_min: 540, hasta_min: 1080 },
+    },
   },
 };
 
