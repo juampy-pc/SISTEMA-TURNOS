@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(32);
+select plan(35);
 
 create function public.test_roles() returns jsonb language sql as $$
   select '[
@@ -58,6 +58,10 @@ select set_config('t.h10', ((current_setting('t.fecha')::date)::timestamp + inte
 select set_config('request.jwt.claims', '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}', true);
 set local role authenticated;
 select is((select count(*)::int from public.huecos_disponibles(current_setting('t.r1')::uuid, current_setting('t.srv')::uuid, current_setting('t.fecha')::date)), 15, 'hay 15 huecos de 30 min cada 15 en 09:00-13:00');
+select lives_ok($$update public.negocios set intervalo_min = 30 where id = current_setting('t.neg_a')::uuid$$, 'el dueño cambia el intervalo entre horarios');
+select is((select count(*)::int from public.huecos_disponibles(current_setting('t.r1')::uuid, current_setting('t.srv')::uuid, current_setting('t.fecha')::date)), 8, 'con intervalo de 30 min hay 8 huecos en 09:00-13:00');
+select throws_ok($$update public.negocios set intervalo_min = 7 where id = current_setting('t.neg_a')::uuid$$, '23514', null, 'un intervalo inválido se rechaza');
+update public.negocios set intervalo_min = 15 where id = current_setting('t.neg_a')::uuid;
 select lives_ok($$insert into public.turnos (negocio_id, recurso_id, servicio_id, cliente_id, inicio, fin, estado)
   values (current_setting('t.neg_a')::uuid, current_setting('t.r1')::uuid, current_setting('t.srv')::uuid, current_setting('t.c1')::uuid,
           current_setting('t.h10')::timestamptz, current_setting('t.h10')::timestamptz + interval '30 minutes', 'confirmado')$$, 'A crea un turno');

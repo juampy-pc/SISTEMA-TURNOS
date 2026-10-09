@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { parseHora } from './horarios';
 
 export const PASOS_MINUTOS = [15, 20, 30, 45, 60, 90, 120] as const;
+export const INTERVALOS_MINUTOS = [10, 15, 20, 30, 60] as const;
 
 const nombre = (max: number) =>
   z.string().trim().min(2, 'El nombre es muy corto.').max(max, `El nombre es muy largo (máximo ${max}).`);
@@ -49,6 +50,9 @@ export const configTurnosSchema = z.object({
   paso_minutos: z.coerce
     .number()
     .refine((n) => (PASOS_MINUTOS as readonly number[]).includes(n), 'Paso inválido.'),
+  intervalo_min: z.coerce
+    .number()
+    .refine((n) => (INTERVALOS_MINUTOS as readonly number[]).includes(n), 'Intervalo inválido.'),
   anticipacion_min_horas: z.coerce.number().int().min(0).max(168),
   anticipacion_max_dias: z.coerce.number().int().min(1).max(365),
 });

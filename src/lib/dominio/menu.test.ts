@@ -11,13 +11,14 @@ describe('itemsDeMenu', () => {
       '/panel/servicios',
       '/panel/recursos',
       '/panel/horarios',
+      '/panel/configuracion',
       '/panel/empleados',
     ]);
   });
 
-  test('servicios, recursos y horarios requieren gestionar_servicios', () => {
+  test('servicios, recursos, horarios y configuración requieren gestionar_servicios', () => {
     const con = itemsDeMenu({ es_dueno: false, permisos: { gestionar_servicios: true } }).map((i) => i.href);
-    expect(con).toEqual(['/panel', '/panel/servicios', '/panel/recursos', '/panel/horarios']);
+    expect(con).toEqual(['/panel', '/panel/servicios', '/panel/recursos', '/panel/horarios', '/panel/configuracion']);
   });
 
   test('un empleado no ve Empleados', () => {

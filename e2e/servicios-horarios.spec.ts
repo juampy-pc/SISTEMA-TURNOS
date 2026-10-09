@@ -86,3 +86,18 @@ test('bloqueos: fecha de fin anterior se rechaza', async ({ page }) => {
   await form.getByRole('button', { name: 'Agregar bloqueo' }).click();
   await expect(page.getByRole('main').getByRole('status')).toHaveText('Bloqueo guardado.');
 });
+
+test('configuración avanzada: el intervalo entre horarios se guarda', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('Email').fill(dueno.email);
+  await page.getByLabel('Contraseña', { exact: true }).fill(dueno.password);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page).toHaveURL(/\/panel$/);
+
+  await page.getByRole('link', { name: 'Configuración avanzada' }).click();
+  await expect(page).toHaveURL(/\/panel\/configuracion$/);
+  await page.getByLabel('Intervalo entre horarios').selectOption('30');
+  await page.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByRole('main').getByRole('status')).toHaveText('Configuración guardada.');
+  await expect(page.getByLabel('Intervalo entre horarios')).toHaveValue('30');
+});

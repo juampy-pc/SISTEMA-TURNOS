@@ -45,8 +45,8 @@ describe('bloqueoSchema', () => {
 
 describe('configTurnosSchema', () => {
   it('valida paso y anticipación', () => {
-    expect(configTurnosSchema.safeParse({ paso_minutos: '60', anticipacion_min_horas: '1', anticipacion_max_dias: '30' }).success).toBe(true);
-    expect(configTurnosSchema.safeParse({ paso_minutos: '7', anticipacion_min_horas: '1', anticipacion_max_dias: '30' }).success).toBe(false);
-    expect(configTurnosSchema.safeParse({ paso_minutos: '60', anticipacion_min_horas: '-1', anticipacion_max_dias: '30' }).success).toBe(false);
+    expect(configTurnosSchema.safeParse({ intervalo_min: '15', paso_minutos: '60', anticipacion_min_horas: '1', anticipacion_max_dias: '30' }).success).toBe(true);
+    expect(configTurnosSchema.safeParse({ intervalo_min: '15', paso_minutos: '7', anticipacion_min_horas: '1', anticipacion_max_dias: '30' }).success).toBe(false);
+    expect(configTurnosSchema.safeParse({ intervalo_min: '15', paso_minutos: '60', anticipacion_min_horas: '-1', anticipacion_max_dias: '30' }).success).toBe(false);
   });
 });

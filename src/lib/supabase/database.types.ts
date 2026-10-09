@@ -123,14 +123,14 @@ isOneToOne: false
                   ]
                 },"negocios": {
                   Row: {
-                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"zona_horaria": string
+                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"intervalo_min": number,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"zona_horaria": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"zona_horaria"?: string
                   }
                   Update: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"zona_horaria"?: string
                   }
                   Relationships: [
                     

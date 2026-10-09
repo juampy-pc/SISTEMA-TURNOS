@@ -1,6 +1,6 @@
 'use server';
 
-import { bloqueoSchema, configTurnosSchema, franjaSchema } from '@/lib/dominio/esquemas-turnos';
+import { bloqueoSchema, franjaSchema } from '@/lib/dominio/esquemas-turnos';
 import { validarFranjas } from '@/lib/dominio/horarios';
 import { crearVolver, exigirGestionServicios, leerUuid, type Volver } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
@@ -157,25 +157,4 @@ export async function quitarBloqueo(formData: FormData) {
   const { error } = await supabase.from('bloqueos').delete().eq('id', id).eq('negocio_id', ctx.negocio.id);
   if (error) volver('error', 'No se pudo quitar el bloqueo.');
   volver('ok', 'Bloqueo quitado.');
-}
-
-export async function guardarConfigTurnos(formData: FormData) {
-  const rawRecurso = formData.get('recursoId');
-  const volver: Volver = volverA(typeof rawRecurso === 'string' && rawRecurso ? rawRecurso : null);
-  const ctx = await exigirGestionServicios(volver);
-  const r = configTurnosSchema.safeParse({
-    // En modo editable el paso no se muestra: se conserva el actual.
-    paso_minutos: formData.get('paso_minutos') ?? '60',
-    anticipacion_min_horas: formData.get('anticipacion_min_horas'),
-    anticipacion_max_dias: formData.get('anticipacion_max_dias'),
-  });
-  if (!r.success) volver('error', r.error.issues[0].message);
-  const cambios =
-    formData.get('paso_minutos') === null
-      ? { anticipacion_min_horas: r.data.anticipacion_min_horas, anticipacion_max_dias: r.data.anticipacion_max_dias }
-      : r.data;
-  const supabase = await crearClienteServidor();
-  const { data, error } = await supabase.from('negocios').update(cambios).eq('id', ctx.negocio.id).select('id');
-  if (error || !data?.length) volver('error', 'No se pudo guardar la configuración.');
-  volver('ok', 'Configuración guardada.');
 }

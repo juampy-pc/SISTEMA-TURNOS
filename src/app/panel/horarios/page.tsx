@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
-import { PASOS_MINUTOS } from '@/lib/dominio/esquemas-turnos';
 import { DIAS, formatearHora } from '@/lib/dominio/horarios';
 import { puede } from '@/lib/dominio/permisos';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
-import { agregarBloqueo, agregarFranja, copiarHorario, guardarConfigTurnos, quitarBloqueo, quitarFranja } from './actions';
+import { agregarBloqueo, agregarFranja, copiarHorario, quitarBloqueo, quitarFranja } from './actions';
 
 const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
 const boton = 'min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white';
@@ -23,10 +22,9 @@ export default async function HorariosPage({
 
   const supabase = await crearClienteServidor();
   const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
-  const [{ data: recursosData }, { data: bloqueosData }, { data: negocio }] = await Promise.all([
+  const [{ data: recursosData }, { data: bloqueosData }] = await Promise.all([
     supabase.from('recursos').select('id, nombre').eq('activo', true).order('orden').order('nombre'),
     supabase.from('bloqueos').select('id, recurso_id, desde, hasta, motivo').gte('hasta', hoy).order('desde'),
-    supabase.from('negocios').select('paso_minutos, anticipacion_min_horas, anticipacion_max_dias').eq('id', ctx.negocio.id).single(),
   ]);
   const recursos = recursosData ?? [];
   const nombreDe = new Map(recursos.map((r) => [r.id, r.nombre]));
@@ -155,28 +153,6 @@ export default async function HorariosPage({
         </ul>
       </section>
 
-      {negocio && (
-        <section className="space-y-3">
-          <h3 className="font-semibold">Reglas de reserva</h3>
-          <form action={guardarConfigTurnos} className="grid gap-3 rounded-xl border border-stone-200 bg-white p-4 sm:grid-cols-3">
-            {actual && <input type="hidden" name="recursoId" value={actual.id} />}
-            {ctx.negocio.modo_turnos === 'fijo' && (
-              <label className="text-sm">Duración de cada turno
-                <select name="paso_minutos" defaultValue={negocio.paso_minutos} className={input}>
-                  {PASOS_MINUTOS.map((p) => <option key={p} value={p}>{p} minutos</option>)}
-                </select>
-              </label>
-            )}
-            <label className="text-sm">Anticipación mínima (horas)
-              <input name="anticipacion_min_horas" type="number" inputMode="numeric" min={0} max={168} defaultValue={negocio.anticipacion_min_horas} required className={input} />
-            </label>
-            <label className="text-sm">Reservas hasta (días hacia adelante)
-              <input name="anticipacion_max_dias" type="number" inputMode="numeric" min={1} max={365} defaultValue={negocio.anticipacion_max_dias} required className={input} />
-            </label>
-            <div className="sm:col-span-3"><button className={boton}>Guardar reglas</button></div>
-          </form>
-        </section>
-      )}
     </div>
   );
 }
