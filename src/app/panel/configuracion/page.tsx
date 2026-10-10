@@ -3,7 +3,7 @@ import { INTERVALOS_MINUTOS, PASOS_MINUTOS } from '@/lib/dominio/esquemas-turnos
 import { puede } from '@/lib/dominio/permisos';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
-import { guardarConfigTurnos } from './actions';
+import { guardarConfigTurnos, guardarWhatsapp } from './actions';
 
 const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
 const boton = 'min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white';
@@ -21,7 +21,7 @@ export default async function ConfiguracionPage({
   const supabase = await crearClienteServidor();
   const { data: negocio } = await supabase
     .from('negocios')
-    .select('paso_minutos, intervalo_min, anticipacion_min_horas, anticipacion_max_dias')
+    .select('paso_minutos, intervalo_min, anticipacion_min_horas, anticipacion_max_dias, whatsapp')
     .eq('id', ctx.negocio.id)
     .single();
 
@@ -56,6 +56,23 @@ export default async function ConfiguracionPage({
           </label>
           <div className="sm:col-span-3"><button className={boton}>Guardar</button></div>
         </form>
+      )}
+
+      {negocio && (
+        <section aria-label="Página pública" className="space-y-3 rounded-xl border border-stone-200 bg-white p-4">
+          <h3 className="font-semibold">Página para tus clientes</h3>
+          <p className="text-sm text-stone-600">
+            Compartí este link para que te pidan turno:{' '}
+            <a href={`/b/${ctx.negocio.slug}`} target="_blank" className="font-medium underline">/b/{ctx.negocio.slug}</a>
+          </p>
+          <form action={guardarWhatsapp} className="flex flex-wrap items-end gap-2">
+            <label className="min-w-0 flex-1 text-sm">WhatsApp del negocio
+              <input name="whatsapp" type="tel" inputMode="tel" defaultValue={negocio.whatsapp} placeholder="11 4444-5555" className={input} />
+              <span className={ayuda}>Cuando alguien pide un turno, puede avisarte por acá. Dejalo vacío para no mostrarlo.</span>
+            </label>
+            <button className={boton}>Guardar WhatsApp</button>
+          </form>
+        </section>
       )}
     </div>
   );

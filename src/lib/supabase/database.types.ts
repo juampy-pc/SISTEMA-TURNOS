@@ -69,6 +69,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"dispositivos_confiables": {
+                  Row: {
+                    "cliente_id": string,"confiable": boolean,"created_at": string,"id": string,"negocio_id": string,"token_hash": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cliente_id": string,"confiable"?: boolean,"created_at"?: string,"id"?: string,"negocio_id": string,"token_hash": string
+                  }
+                  Update: {
+                    "cliente_id"?: string,"confiable"?: boolean,"created_at"?: string,"id"?: string,"negocio_id"?: string,"token_hash"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dispositivos_confiables_cliente_id_negocio_id_fkey"
+      columns: ["cliente_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "clientes"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "dispositivos_confiables_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"horarios": {
                   Row: {
                     "desde_min": number,"dia_semana": number,"hasta_min": number,"id": string,"negocio_id": string,"recurso_id": string
@@ -123,14 +149,14 @@ isOneToOne: false
                   ]
                 },"negocios": {
                   Row: {
-                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"intervalo_min": number,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"zona_horaria": string
+                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"intervalo_min": number,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"whatsapp": string,"zona_horaria": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
                   }
                   Update: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
                   }
                   Relationships: [
                     
@@ -235,14 +261,14 @@ isOneToOne: false
                   ]
                 },"turnos": {
                   Row: {
-                    "cliente_id": string,"created_at": string,"estado": string,"fin": string,"id": string,"inicio": string,"monto_cobrado": number | null,"negocio_id": string,"nota_cliente": string,"notas": string,"recurso_id": string,"servicio_id": string
+                    "cliente_id": string,"created_at": string,"dispositivo_id": string | null,"estado": string,"fin": string,"id": string,"inicio": string,"monto_cobrado": number | null,"negocio_id": string,"nota_cliente": string,"notas": string,"recurso_id": string,"servicio_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "cliente_id": string,"created_at"?: string,"estado"?: string,"fin": string,"id"?: string,"inicio": string,"monto_cobrado"?: number | null,"negocio_id": string,"nota_cliente"?: string,"notas"?: string,"recurso_id": string,"servicio_id": string
+                    "cliente_id": string,"created_at"?: string,"dispositivo_id"?: string | null,"estado"?: string,"fin": string,"id"?: string,"inicio": string,"monto_cobrado"?: number | null,"negocio_id": string,"nota_cliente"?: string,"notas"?: string,"recurso_id": string,"servicio_id": string
                   }
                   Update: {
-                    "cliente_id"?: string,"created_at"?: string,"estado"?: string,"fin"?: string,"id"?: string,"inicio"?: string,"monto_cobrado"?: number | null,"negocio_id"?: string,"nota_cliente"?: string,"notas"?: string,"recurso_id"?: string,"servicio_id"?: string
+                    "cliente_id"?: string,"created_at"?: string,"dispositivo_id"?: string | null,"estado"?: string,"fin"?: string,"id"?: string,"inicio"?: string,"monto_cobrado"?: number | null,"negocio_id"?: string,"nota_cliente"?: string,"notas"?: string,"recurso_id"?: string,"servicio_id"?: string
                   }
                   Relationships: [
                     {
@@ -251,6 +277,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "clientes"
       referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "turnos_dispositivo_id_fkey"
+      columns: ["dispositivo_id"]
+isOneToOne: false
+      referencedRelation: "dispositivos_confiables"
+      referencedColumns: ["id"]
     },{
       foreignKeyName: "turnos_negocio_id_fkey"
       columns: ["negocio_id"]
@@ -280,9 +312,27 @@ isOneToOne: false
             "crear_negocio":
 { Args: { "p_modo_turnos": string,"p_nombre": string,"p_nombre_dueno": string,"p_roles": Json,"p_slug": string,"p_tipo": string,"p_vende_productos": boolean }; Returns: string
                            },
+"datos_dispositivo":
+{ Args: { "p_negocio": string,"p_token_hash": string }; Returns: {
+              "nombre": string,"telefono": string
+            }[]
+                           },
 "huecos_disponibles":
 { Args: { "p_fecha": string,"p_recurso": string,"p_servicio": string }; Returns: {
               "fin": string,"inicio": string
+            }[]
+                           },
+"huecos_publicos":
+{ Args: { "p_fecha": string,"p_negocio": string,"p_recurso": string,"p_servicio": string }; Returns: {
+              "fin": string,"inicio": string,"recurso_id": string
+            }[]
+                           },
+"negocio_publico":
+{ Args: { "p_slug": string }; Returns: Json
+                           },
+"reservar_publico":
+{ Args: { "p_inicio": string,"p_ip": string,"p_negocio": string,"p_nombre": string,"p_nota": string,"p_recurso": string,"p_servicio": string,"p_telefono": string,"p_token_hash": string }; Returns: {
+              "estado": string,"turno_id": string
             }[]
                            },
 "sembrar_plantilla":

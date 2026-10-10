@@ -1,6 +1,7 @@
 'use server';
 
 import { configTurnosSchema } from '@/lib/dominio/esquemas-turnos';
+import { normalizarTelefono } from '@/lib/dominio/telefono';
 import { crearVolver, exigirGestionServicios, type Volver } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
@@ -26,4 +27,19 @@ export async function guardarConfigTurnos(formData: FormData) {
   const { data, error } = await supabase.from('negocios').update(cambios).eq('id', ctx.negocio.id).select('id');
   if (error || !data?.length) volver('error', 'No se pudo guardar la configuración.');
   volver('ok', 'Configuración guardada.');
+}
+
+export async function guardarWhatsapp(formData: FormData) {
+  const ctx = await exigirGestionServicios(volver);
+  const crudo = typeof formData.get('whatsapp') === 'string' ? String(formData.get('whatsapp')).slice(0, 30).trim() : '';
+  let whatsapp = '';
+  if (crudo) {
+    const tel = normalizarTelefono(crudo);
+    if (!tel.ok) volver('error', tel.error);
+    whatsapp = tel.e164;
+  }
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.from('negocios').update({ whatsapp }).eq('id', ctx.negocio.id).select('id');
+  if (error || !data?.length) volver('error', 'No se pudo guardar el WhatsApp.');
+  volver('ok', whatsapp ? 'WhatsApp guardado.' : 'WhatsApp borrado.');
 }
