@@ -113,3 +113,21 @@ export async function guardarDetalleTurno(formData: FormData) {
   if (error || !data?.length) volver('error', 'No se pudo guardar el detalle.');
   volver('ok', 'Detalle del turno guardado.');
 }
+
+export async function revocarDispositivo(formData: FormData) {
+  const crudo = formData.get('clienteId');
+  const volver: Volver = volverAFicha(typeof crudo === 'string' ? crudo : null);
+  const ctx = await exigirClientes(volver);
+  const clienteId = leerUuid(crudo, () => volver('error', 'Solicitud inválida.'));
+  const id = leerUuid(formData.get('dispositivoId'), () => volver('error', 'Solicitud inválida.'));
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase
+    .from('dispositivos_confiables')
+    .delete()
+    .eq('id', id)
+    .eq('cliente_id', clienteId)
+    .eq('negocio_id', ctx.negocio.id)
+    .select('id');
+  if (error || !data?.length) volver('error', 'No se pudo quitar el dispositivo.');
+  volver('ok', 'Dispositivo quitado: sus próximos pedidos van a quedar pendientes.');
+}

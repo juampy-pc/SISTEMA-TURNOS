@@ -7,7 +7,7 @@ import { posibleDuplicado } from '@/lib/dominio/telefono';
 import { ETIQUETA_ESTADO, esEstadoTurno } from '@/lib/dominio/turnos';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
-import { guardarCliente, guardarDetalleTurno, unirClientes } from '../actions';
+import { guardarCliente, guardarDetalleTurno, revocarDispositivo, unirClientes } from '../actions';
 
 const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
 const boton = 'min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white';
@@ -30,7 +30,7 @@ export default async function FichaClientePage({
   const { data: cliente } = await supabase.from('clientes').select('id, nombre, telefono, notas, created_at').eq('id', id).maybeSingle();
   if (!cliente) notFound();
 
-  const [{ data: turnos }, { data: otros }] = await Promise.all([
+  const [{ data: turnos }, { data: otros }, { data: dispositivos }] = await Promise.all([
     supabase
       .from('turnos')
       .select('id, inicio, estado, notas, monto_cobrado, servicio:servicios(nombre), recurso:recursos(nombre)')
@@ -38,6 +38,7 @@ export default async function FichaClientePage({
       .order('inicio', { ascending: false })
       .limit(50),
     supabase.from('clientes').select('id, nombre, telefono').neq('id', id).limit(2000),
+    supabase.from('dispositivos_confiables').select('id, created_at').eq('cliente_id', id).eq('confiable', true).order('created_at'),
   ]);
   const editaTurnos = puede(ctx.rol, 'gestionar_turnos');
   const duplicados = (otros ?? []).filter((o) => posibleDuplicado(cliente.telefono, o.telefono));
@@ -69,6 +70,25 @@ export default async function FichaClientePage({
                   <input type="hidden" name="destinoId" value={cliente.id} />
                   <input type="hidden" name="origenId" value={d.id} />
                   <button className={botonSec}>Unir en esta ficha</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {(dispositivos ?? []).length > 0 && (
+        <section aria-label="Dispositivos confiables" className="space-y-2 rounded-xl border border-stone-200 bg-white p-4 text-sm">
+          <h3 className="font-semibold">Dispositivos confiables</h3>
+          <p className="text-stone-600">Los turnos que pide desde estos dispositivos se confirman solos.</p>
+          <ul className="space-y-2">
+            {(dispositivos ?? []).map((d, i) => (
+              <li key={d.id} className="flex flex-wrap items-center justify-between gap-2">
+                <span>Dispositivo {i + 1} · desde el {new Date(d.created_at).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</span>
+                <form action={revocarDispositivo}>
+                  <input type="hidden" name="clienteId" value={cliente.id} />
+                  <input type="hidden" name="dispositivoId" value={d.id} />
+                  <button className={botonSec}>Quitar</button>
                 </form>
               </li>
             ))}

@@ -22,7 +22,9 @@ Requiere Node 22 y Docker (si tu usuario no está en el grupo `docker`, corré l
 - Sub-proyecto 1 (auth, negocios, roles, empleados): listo.
 - Sub-proyecto 2a (servicios, recursos, horarios, bloqueos, reglas de reserva, "Primeros pasos"): listo. Plan en `docs/superpowers/plans/2026-10-08-servicios-recursos-horarios.md`.
 - Sub-proyecto 2b (clientes, turnos, disponibilidad, agenda): listo. Plan en `docs/superpowers/plans/2026-10-08-clientes-turnos-agenda.md`.
-- Pendiente: 2c (reserva pública, confirmación, dispositivos confiables), luego los sub-proyectos 3 a 5 del spec.
+- Sub-proyecto 2c (página pública `/b/[slug]`, confirmación del dueño, dispositivos confiables, límites anti-spam, WhatsApp del negocio): listo. Plan en `docs/superpowers/plans/2026-10-10-reserva-publica.md`.
+- Clientes: alta manual y detalle editable por turno en la ficha.
+- Pendiente: sub-proyectos 3 (marca), 4 (catálogo, stock y ventas) y 5 (Inicio completo y Métricas).
 
 ## Pendientes antes de lanzar al público
 

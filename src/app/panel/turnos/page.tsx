@@ -42,7 +42,7 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
   const [{ data: turnosData }, { data: recursosData }, { data: serviciosData }, { data: vinculos }] = await Promise.all([
     supabase
       .from('turnos')
-      .select('id, inicio, fin, estado, notas, monto_cobrado, recurso_id, servicio:servicios(nombre, precio), cliente:clientes(id, nombre, telefono)')
+      .select('id, inicio, fin, estado, notas, nota_cliente, monto_cobrado, dispositivo_id, recurso_id, servicio:servicios(nombre, precio), cliente:clientes(id, nombre, telefono)')
       .gte('inicio', desde)
       .lt('inicio', hasta)
       .order('inicio'),
@@ -117,6 +117,12 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
                   {t.notas && ` · ${t.notas}`}
                   {t.monto_cobrado !== null && ` · Cobrado $${Number(t.monto_cobrado)}`}
                 </p>
+                {(t.nota_cliente || t.dispositivo_id) && (
+                  <p className="text-sm text-stone-600">
+                    <span className="rounded bg-stone-100 px-1.5 py-0.5 text-xs">Pedido desde la página</span>
+                    {t.nota_cliente && ` “${t.nota_cliente}”`}
+                  </p>
+                )}
                 <div className="flex flex-wrap items-end gap-2">
                   {transicionesDe(estado).map((nuevo) =>
                     nuevo === 'completado' ? (

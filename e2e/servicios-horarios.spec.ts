@@ -97,7 +97,7 @@ test('configuración avanzada: el intervalo entre horarios se guarda', async ({ 
   await page.getByRole('link', { name: 'Configuración avanzada' }).click();
   await expect(page).toHaveURL(/\/panel\/configuracion$/);
   await page.getByLabel('Intervalo entre horarios').selectOption('30');
-  await page.getByRole('button', { name: 'Guardar' }).click();
+  await page.getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(page.getByRole('main').getByRole('status')).toHaveText('Configuración guardada.');
   await expect(page.getByLabel('Intervalo entre horarios')).toHaveValue('30');
 });
