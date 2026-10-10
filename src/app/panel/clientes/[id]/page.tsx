@@ -7,7 +7,7 @@ import { posibleDuplicado } from '@/lib/dominio/telefono';
 import { ETIQUETA_ESTADO, esEstadoTurno } from '@/lib/dominio/turnos';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
-import { guardarCliente, unirClientes } from '../actions';
+import { guardarCliente, guardarDetalleTurno, unirClientes } from '../actions';
 
 const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
 const boton = 'min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white';
@@ -33,12 +33,13 @@ export default async function FichaClientePage({
   const [{ data: turnos }, { data: otros }] = await Promise.all([
     supabase
       .from('turnos')
-      .select('id, inicio, estado, servicio:servicios(nombre), recurso:recursos(nombre)')
+      .select('id, inicio, estado, notas, monto_cobrado, servicio:servicios(nombre), recurso:recursos(nombre)')
       .eq('cliente_id', id)
       .order('inicio', { ascending: false })
       .limit(50),
     supabase.from('clientes').select('id, nombre, telefono').neq('id', id).limit(2000),
   ]);
+  const editaTurnos = puede(ctx.rol, 'gestionar_turnos');
   const duplicados = (otros ?? []).filter((o) => posibleDuplicado(cliente.telefono, o.telefono));
 
   return (
@@ -83,10 +84,27 @@ export default async function FichaClientePage({
             const servicio = t.servicio as unknown as { nombre: string } | null;
             const recurso = t.recurso as unknown as { nombre: string } | null;
             return (
-              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
-                <span className="capitalize">{etiquetaDia(new Date(t.inicio).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }))} · {horaLocal(t.inicio)}</span>
-                <span>{servicio?.nombre} · {recurso?.nombre}</span>
-                <span className="text-stone-500">{esEstadoTurno(t.estado) ? ETIQUETA_ESTADO[t.estado] : t.estado}</span>
+              <li key={t.id} className="space-y-2 p-3 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="capitalize">{etiquetaDia(new Date(t.inicio).toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }))} · {horaLocal(t.inicio)}</span>
+                  <span>{servicio?.nombre} · {recurso?.nombre}</span>
+                  <span className="text-stone-500">
+                    {esEstadoTurno(t.estado) ? ETIQUETA_ESTADO[t.estado] : t.estado}
+                    {t.monto_cobrado !== null && ` · Cobrado $${Number(t.monto_cobrado)}`}
+                  </span>
+                </div>
+                {t.notas && <p className="whitespace-pre-line rounded-lg bg-stone-50 px-3 py-2 text-stone-700">{t.notas}</p>}
+                {editaTurnos && (
+                  <details>
+                    <summary className="cursor-pointer text-stone-600 underline">{t.notas ? 'Editar detalle' : 'Agregar detalle'}</summary>
+                    <form action={guardarDetalleTurno} className="mt-2 space-y-2">
+                      <input type="hidden" name="clienteId" value={cliente.id} />
+                      <input type="hidden" name="turnoId" value={t.id} />
+                      <textarea name="notas" defaultValue={t.notas} maxLength={500} rows={3} placeholder="Qué se hizo, productos usados, observaciones…" aria-label="Detalle del turno" className={input} />
+                      <button className={botonSec}>Guardar detalle</button>
+                    </form>
+                  </details>
+                )}
               </li>
             );
           })}
