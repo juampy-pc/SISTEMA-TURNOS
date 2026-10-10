@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { esFechaISO, etiquetaDia, horaLocal, hoyISO, rangoDelDia, sumarDias } from '@/lib/dominio/fechas';
 import { puede } from '@/lib/dominio/permisos';
 import { plantillaDe } from '@/lib/dominio/plantillas';
+import { motivoSinHorarios } from '@/lib/dominio/sin-horarios';
 import { ESTADOS_TURNO, ETIQUETA_ESTADO, esEstadoTurno, transicionesDe } from '@/lib/dominio/turnos';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
@@ -75,6 +76,38 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
   // "Cualquiera": un solo botón por horario, con el primer recurso libre.
   const vistos = new Set<string>();
   const huecosUnicos = huecos.filter((h) => (vistos.has(h.inicio) ? false : (vistos.add(h.inicio), true)));
+
+  // Sin horarios: averigua el motivo para decirle al dueño qué corregir.
+  let motivo = '';
+  if (servicioSel && p.recurso && huecosUnicos.length === 0) {
+    const dow = new Date(`${fecha}T12:00:00Z`).getUTCDay();
+    const [{ data: franjas }, { data: bloqueos }, { data: negocio }] = await Promise.all([
+      supabase.from('horarios').select('recurso_id').eq('dia_semana', dow),
+      supabase.from('bloqueos').select('recurso_id').lte('desde', fecha).gte('hasta', fecha),
+      supabase.from('negocios').select('anticipacion_max_dias').eq('id', ctx.negocio.id).single(),
+    ]);
+    const atienden = new Set((franjas ?? []).map((f) => f.recurso_id));
+    const bloqueoGeneral = (bloqueos ?? []).some((b) => b.recurso_id === null);
+    const bloqueados = new Set((bloqueos ?? []).map((b) => b.recurso_id));
+    const consultado = (r: { id: string; nombre: string }) => ({
+      nombre: r.nombre,
+      haceServicio: recursosDelServicio.some((x) => x.id === r.id),
+      atiendeEseDia: atienden.has(r.id),
+      bloqueado: bloqueoGeneral || bloqueados.has(r.id),
+    });
+    const elegido = p.recurso !== 'cualquiera' ? recursos.find((r) => r.id === p.recurso) : undefined;
+    const maxDias = negocio?.anticipacion_max_dias ?? 30;
+    motivo = motivoSinHorarios({
+      fecha,
+      hoy: hoyISO(),
+      maxFecha: sumarDias(hoyISO(), maxDias),
+      anticipacionMaxDias: maxDias,
+      servicio: servicioSel.nombre,
+      recurso: plantilla.recurso,
+      elegido: elegido ? consultado(elegido) : null,
+      todos: recursos.map(consultado),
+    });
+  }
 
   const reservaCap = plantilla.reserva.singular;
 
@@ -153,6 +186,7 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
 
       <section aria-label={`Nuevo ${reservaCap}`} className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
         <h3 className="font-semibold">Nuevo {reservaCap}</h3>
+        <p className="text-sm text-stone-600">Para el <span className="font-medium">{etiquetaDia(fecha)}</span>. Para otro día, cambialo arriba.</p>
         {servicios.length === 0 ? (
           <p className="text-stone-500">Primero cargá tus servicios.</p>
         ) : (
@@ -176,7 +210,7 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
 
             {servicioSel && p.recurso && (
               huecosUnicos.length === 0 ? (
-                <p className="text-stone-500">No hay horarios libres para ese día. Probá con otro día o {plantilla.recurso.singular}.</p>
+                <p role="note" className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">No hay horarios libres. {motivo}</p>
               ) : (
                 <form action={crearTurno} className="space-y-4">
                   <input type="hidden" name="fecha" value={fecha} />

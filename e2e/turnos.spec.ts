@@ -111,6 +111,16 @@ test('se guarda un detalle por turno en la ficha del cliente', async ({ page }) 
   await expect(page.locator('p', { hasText: 'Corte degradé, número 2 a los costados.' })).toBeVisible();
 });
 
+test('sin horarios, la agenda explica el motivo', async ({ page }) => {
+  await entrar(page);
+  let domingo = sumarDias(hoyISO(), 1);
+  while (new Date(`${domingo}T12:00:00Z`).getUTCDay() !== 0) domingo = sumarDias(domingo, 1);
+  await page.goto(`/panel/turnos?fecha=${domingo}`);
+  await page.locator('select[name="servicio"]').selectOption({ label: 'Corte' });
+  await page.getByRole('button', { name: 'Ver horarios libres' }).click();
+  await expect(page.getByRole('note')).toContainText('atiende los domingos');
+});
+
 test('un empleado sin permiso de turnos no entra a la agenda', async ({ page }) => {
   await entrar(page);
   await page.goto('/panel/turnos');

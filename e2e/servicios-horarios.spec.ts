@@ -33,7 +33,7 @@ test('servicios: alta, error de duración y desactivación', async ({ page }) =>
   await page.getByRole('main').getByLabel('Nombre').first().fill('Masaje');
   await page.getByLabel('Duración (minutos)').fill('45');
   await page.getByRole('button', { name: 'Crear servicio' }).click();
-  await expect(page.getByRole('main').getByRole('status')).toHaveText('Servicio creado.');
+  await expect(page.getByRole('main').getByRole('status')).toHaveText(/^Servicio creado y asignado a todos\./);
 
   // Repetido
   await page.getByRole('main').getByLabel('Nombre').first().fill('Masaje');
