@@ -81,6 +81,36 @@ test('un teléfono parecido se sugiere como duplicado y se puede unir', async ({
   await expect(page.getByRole('link', { name: /Carla/ })).toHaveCount(1);
 });
 
+test('alta manual de cliente y teléfono repetido lleva a la ficha existente', async ({ page }) => {
+  await entrar(page);
+  await page.goto('/panel/clientes');
+  await page.getByText('Nuevo cliente').click();
+  await page.getByLabel('Nombre', { exact: true }).fill('Lucía Pérez');
+  await page.getByLabel('Teléfono').fill('011 15-3333-2222');
+  await page.getByRole('button', { name: 'Agregar cliente' }).click();
+  await expect(page.getByRole('main').getByRole('status')).toHaveText('Cliente agregado.');
+  await expect(page.getByRole('heading', { name: 'Lucía Pérez' })).toBeVisible();
+
+  await page.goto('/panel/clientes');
+  await page.getByText('Nuevo cliente').click();
+  await page.getByLabel('Nombre', { exact: true }).fill('Lucía otra');
+  await page.getByLabel('Teléfono').fill('+54 9 11 3333-2222');
+  await page.getByRole('button', { name: 'Agregar cliente' }).click();
+  await expect(page.getByRole('main').getByRole('alert')).toContainText('Ya tenías un cliente con ese teléfono');
+  await expect(page.getByRole('heading', { name: 'Lucía Pérez' })).toBeVisible();
+});
+
+test('se guarda un detalle por turno en la ficha del cliente', async ({ page }) => {
+  await entrar(page);
+  await page.goto('/panel/clientes');
+  await page.getByRole('link', { name: /Carla/ }).click();
+  await page.getByText('Agregar detalle').first().click();
+  await page.getByLabel('Detalle del turno').first().fill('Corte degradé, número 2 a los costados.');
+  await page.getByRole('button', { name: 'Guardar detalle' }).first().click();
+  await expect(page.getByRole('main').getByRole('status')).toHaveText('Detalle del turno guardado.');
+  await expect(page.locator('p', { hasText: 'Corte degradé, número 2 a los costados.' })).toBeVisible();
+});
+
 test('un empleado sin permiso de turnos no entra a la agenda', async ({ page }) => {
   await entrar(page);
   await page.goto('/panel/turnos');
