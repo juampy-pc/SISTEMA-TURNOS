@@ -9,6 +9,12 @@ export interface NegocioPublico {
   tipo: TipoNegocio;
   whatsapp: string;
   anticipacion_max_dias: number;
+  descripcion: string;
+  direccion: string;
+  instagram: string;
+  color: string;
+  logo_url: string;
+  productos: { id: string; nombre: string; descripcion: string; precio: number; foto_url: string; hay_stock: boolean }[];
   servicios: { id: string; nombre: string; duracion_min: number; precio: number; recursos: string[] }[];
   recursos: { id: string; nombre: string }[];
 }

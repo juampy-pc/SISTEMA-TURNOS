@@ -6,7 +6,7 @@ import { cerrarSesion } from './actions';
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const ctx = await obtenerContexto();
-  const items = itemsDeMenu(ctx.rol);
+  const items = itemsDeMenu(ctx.rol, undefined, ctx.negocio.vende_productos);
   const plural = plantillaDe(ctx.negocio.tipo).recurso.plural;
   const etiquetaRecursos = plural.charAt(0).toUpperCase() + plural.slice(1);
 

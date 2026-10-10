@@ -30,7 +30,8 @@ export default async function FichaClientePage({
   const { data: cliente } = await supabase.from('clientes').select('id, nombre, telefono, notas, created_at').eq('id', id).maybeSingle();
   if (!cliente) notFound();
 
-  const [{ data: turnos }, { data: otros }, { data: dispositivos }] = await Promise.all([
+  const verVentas = ctx.negocio.vende_productos && (puede(ctx.rol, 'registrar_ventas') || puede(ctx.rol, 'ver_ingresos'));
+  const [{ data: turnos }, { data: otros }, { data: dispositivos }, { data: compras }] = await Promise.all([
     supabase
       .from('turnos')
       .select('id, inicio, estado, notas, monto_cobrado, servicio:servicios(nombre), recurso:recursos(nombre)')
@@ -39,6 +40,14 @@ export default async function FichaClientePage({
       .limit(50),
     supabase.from('clientes').select('id, nombre, telefono').neq('id', id).limit(2000),
     supabase.from('dispositivos_confiables').select('id, created_at').eq('cliente_id', id).eq('confiable', true).order('created_at'),
+    verVentas
+      ? supabase
+          .from('ventas')
+          .select('id, cantidad, monto, created_at, producto:productos(nombre)')
+          .eq('cliente_id', id)
+          .order('created_at', { ascending: false })
+          .limit(50)
+      : Promise.resolve({ data: [] as never[] }),
   ]);
   const editaTurnos = puede(ctx.rol, 'gestionar_turnos');
   const duplicados = (otros ?? []).filter((o) => posibleDuplicado(cliente.telefono, o.telefono));
@@ -130,6 +139,24 @@ export default async function FichaClientePage({
           })}
         </ul>
       </section>
+
+      {verVentas && (
+        <section aria-label="Compras" className="space-y-3">
+          <h3 className="font-semibold">Compras</h3>
+          {(compras ?? []).length === 0 && <p className="text-stone-500">Todavía no compró productos.</p>}
+          <ul className="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white">
+            {(compras ?? []).map((v) => (
+              <li key={v.id} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
+                <span>
+                  {new Date(v.created_at).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}
+                  {' · '}{v.cantidad} × {(v.producto as unknown as { nombre: string } | null)?.nombre}
+                </span>
+                <strong>${Number(v.monto).toLocaleString('es-AR')}</strong>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

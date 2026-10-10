@@ -32,3 +32,8 @@ export function etiquetaDia(fecha: string): string {
     timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long',
   });
 }
+
+/** Si el instante `iso` ocurrió dentro de las últimas `horas`. */
+export function esReciente(iso: string, horas: number, ahora: Date = new Date()): boolean {
+  return ahora.getTime() - new Date(iso).getTime() < horas * 60 * 60 * 1000;
+}
