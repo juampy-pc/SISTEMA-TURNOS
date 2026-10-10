@@ -8,7 +8,7 @@ import { crearClienteAdmin } from '@/lib/supabase/admin';
 import { reservar } from './actions';
 
 const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
-const boton = 'min-h-11 rounded-lg bg-stone-900 px-4 py-2 text-white';
+const boton = 'min-h-11 rounded-lg px-4 py-2 text-white';
 const botonSec = 'min-h-11 rounded-lg border border-stone-300 px-3 py-1.5 text-sm';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -77,9 +77,33 @@ export default async function PaginaPublica({
 
   return (
     <main className="mx-auto w-full max-w-xl space-y-6 px-4 py-8 text-stone-900">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-semibold">{negocio.nombre}</h1>
-        <p className="text-stone-600">Pedí tu {reserva} en pocos pasos.</p>
+      <header className="space-y-3">
+        <div className="h-2 rounded-full" style={{ backgroundColor: negocio.color }} aria-hidden />
+        <div className="flex items-center gap-4">
+          {negocio.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={negocio.logo_url} alt={`Logo de ${negocio.nombre}`} className="h-16 w-16 rounded-xl object-cover" />
+          )}
+          <div>
+            <h1 className="text-3xl font-semibold">{negocio.nombre}</h1>
+            <p className="text-stone-600">Pedí tu {reserva} en pocos pasos.</p>
+          </div>
+        </div>
+        {negocio.descripcion && <p className="whitespace-pre-line text-stone-700">{negocio.descripcion}</p>}
+        {(negocio.direccion || negocio.instagram) && (
+          <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600">
+            {negocio.direccion && (
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion)}`} target="_blank" rel="noopener noreferrer" className="underline">
+                📍 {negocio.direccion}
+              </a>
+            )}
+            {negocio.instagram && (
+              <a href={`https://instagram.com/${negocio.instagram}`} target="_blank" rel="noopener noreferrer" className="underline">
+                @{negocio.instagram}
+              </a>
+            )}
+          </p>
+        )}
       </header>
       {p.error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-red-800">{p.error}</p>}
 
@@ -136,9 +160,33 @@ export default async function PaginaPublica({
               <label className="block text-sm">Tu nombre<input name="nombre" defaultValue={precarga.nombre} required minLength={2} maxLength={80} autoComplete="name" className={input} /></label>
               <label className="block text-sm">Tu teléfono (WhatsApp)<input name="telefono" type="tel" inputMode="tel" defaultValue={precarga.telefono} required autoComplete="tel" className={input} /></label>
               <label className="block text-sm">Nota para el negocio (opcional)<textarea name="nota" defaultValue={p.nota ?? ''} maxLength={500} rows={2} className={input} /></label>
-              <button className={boton}>Pedir {reserva}</button>
+              <button className={boton} style={{ backgroundColor: negocio.color }}>Pedir {reserva}</button>
             </form>
           )}
+        </section>
+      )}
+
+      {negocio.productos.length > 0 && (
+        <section aria-label="Productos" className="space-y-3">
+          <h2 className="text-xl font-semibold">Productos</h2>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {negocio.productos.map((x) => (
+              <li key={x.id} className="flex gap-3 rounded-xl border border-stone-200 bg-white p-3">
+                {x.foto_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={x.foto_url} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
+                ) : (
+                  <span aria-hidden className="h-20 w-20 shrink-0 rounded-lg bg-stone-100" />
+                )}
+                <div className="min-w-0 space-y-1 text-sm">
+                  <p className="font-medium">{x.nombre}</p>
+                  {Number(x.precio) > 0 && <p>${Number(x.precio).toLocaleString('es-AR')}</p>}
+                  {x.descripcion && <p className="text-stone-600">{x.descripcion}</p>}
+                  {!x.hay_stock && <p className="text-xs text-stone-500">Sin stock por ahora</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </main>

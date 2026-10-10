@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { esFechaISO, horaLocal, hoyISO, rangoDelDia, sumarDias } from './fechas';
+import { esFechaISO, esReciente, horaLocal, hoyISO, rangoDelDia, sumarDias } from './fechas';
 
 describe('fechas', () => {
   test('hoyISO usa la hora argentina (a las 01:00 UTC todavía es el día anterior)', () => {
@@ -19,5 +19,13 @@ describe('fechas', () => {
   });
   test('horaLocal formatea en hora argentina', () => {
     expect(horaLocal('2026-10-08T13:30:00Z')).toBe('10:30');
+  });
+});
+
+describe('esReciente', () => {
+  test('compara contra las últimas N horas', () => {
+    const ahora = new Date('2026-10-10T12:00:00Z');
+    expect(esReciente('2026-10-10T00:30:00Z', 24, ahora)).toBe(true);
+    expect(esReciente('2026-10-09T11:00:00Z', 24, ahora)).toBe(false);
   });
 });

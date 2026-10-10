@@ -149,17 +149,37 @@ isOneToOne: false
                   ]
                 },"negocios": {
                   Row: {
-                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"created_at": string,"id": string,"intervalo_min": number,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"whatsapp": string,"zona_horaria": string
+                    "anticipacion_max_dias": number,"anticipacion_min_horas": number,"color": string,"created_at": string,"descripcion": string,"direccion": string,"id": string,"instagram": string,"intervalo_min": number,"logo_url": string,"modo_turnos": string,"nombre": string,"paso_minutos": number,"slug": string,"tipo": string,"vende_productos": boolean,"whatsapp": string,"zona_horaria": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"color"?: string,"created_at"?: string,"descripcion"?: string,"direccion"?: string,"id"?: string,"instagram"?: string,"intervalo_min"?: number,"logo_url"?: string,"modo_turnos": string,"nombre": string,"paso_minutos"?: number,"slug": string,"tipo": string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
                   }
                   Update: {
-                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"created_at"?: string,"id"?: string,"intervalo_min"?: number,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
+                    "anticipacion_max_dias"?: number,"anticipacion_min_horas"?: number,"color"?: string,"created_at"?: string,"descripcion"?: string,"direccion"?: string,"id"?: string,"instagram"?: string,"intervalo_min"?: number,"logo_url"?: string,"modo_turnos"?: string,"nombre"?: string,"paso_minutos"?: number,"slug"?: string,"tipo"?: string,"vende_productos"?: boolean,"whatsapp"?: string,"zona_horaria"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"productos": {
+                  Row: {
+                    "activo": boolean,"costo": number | null,"created_at": string,"descripcion": string,"foto_url": string,"id": string,"negocio_id": string,"nombre": string,"precio": number,"stock": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "activo"?: boolean,"costo"?: number | null,"created_at"?: string,"descripcion"?: string,"foto_url"?: string,"id"?: string,"negocio_id": string,"nombre": string,"precio"?: number,"stock"?: number
+                  }
+                  Update: {
+                    "activo"?: boolean,"costo"?: number | null,"created_at"?: string,"descripcion"?: string,"foto_url"?: string,"id"?: string,"negocio_id"?: string,"nombre"?: string,"precio"?: number,"stock"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "productos_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"recurso_servicio": {
                   Row: {
@@ -303,19 +323,66 @@ isOneToOne: false
       referencedColumns: ["id","negocio_id"]
     }
                   ]
+                },"ventas": {
+                  Row: {
+                    "cantidad": number,"cliente_id": string | null,"created_at": string,"id": string,"miembro_id": string | null,"monto": number,"negocio_id": string,"producto_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cantidad": number,"cliente_id"?: string | null,"created_at"?: string,"id"?: string,"miembro_id"?: string | null,"monto": number,"negocio_id": string,"producto_id": string
+                  }
+                  Update: {
+                    "cantidad"?: number,"cliente_id"?: string | null,"created_at"?: string,"id"?: string,"miembro_id"?: string | null,"monto"?: number,"negocio_id"?: string,"producto_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ventas_cliente_id_negocio_id_fkey"
+      columns: ["cliente_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "clientes"
+      referencedColumns: ["id","negocio_id"]
+    },{
+      foreignKeyName: "ventas_miembro_id_fkey"
+      columns: ["miembro_id"]
+isOneToOne: false
+      referencedRelation: "miembros"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ventas_negocio_id_fkey"
+      columns: ["negocio_id"]
+isOneToOne: false
+      referencedRelation: "negocios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ventas_producto_id_negocio_id_fkey"
+      columns: ["producto_id","negocio_id"]
+isOneToOne: false
+      referencedRelation: "productos"
+      referencedColumns: ["id","negocio_id"]
+    }
+                  ]
                 }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            "crear_negocio":
+            "anular_venta":
+{ Args: { "p_venta": string }; Returns: undefined
+                           },
+"crear_negocio":
 { Args: { "p_modo_turnos": string,"p_nombre": string,"p_nombre_dueno": string,"p_roles": Json,"p_slug": string,"p_tipo": string,"p_vende_productos": boolean }; Returns: string
                            },
 "datos_dispositivo":
 { Args: { "p_negocio": string,"p_token_hash": string }; Returns: {
               "nombre": string,"telefono": string
             }[]
+                           },
+"guardar_logo":
+{ Args: { "p_url": string }; Returns: undefined
+                           },
+"guardar_negocio":
+{ Args: { "p_color": string,"p_descripcion": string,"p_direccion": string,"p_instagram": string,"p_nombre": string,"p_vende_productos": boolean,"p_whatsapp": string }; Returns: undefined
                            },
 "huecos_disponibles":
 { Args: { "p_fecha": string,"p_recurso": string,"p_servicio": string }; Returns: {
@@ -329,6 +396,9 @@ isOneToOne: false
                            },
 "negocio_publico":
 { Args: { "p_slug": string }; Returns: Json
+                           },
+"registrar_venta":
+{ Args: { "p_cantidad": number,"p_cliente": string,"p_forzar": boolean,"p_monto": number,"p_producto": string }; Returns: number
                            },
 "reservar_publico":
 { Args: { "p_inicio": string,"p_ip": string,"p_negocio": string,"p_nombre": string,"p_nota": string,"p_recurso": string,"p_servicio": string,"p_telefono": string,"p_token_hash": string }; Returns: {
