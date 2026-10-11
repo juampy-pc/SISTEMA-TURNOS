@@ -5,11 +5,8 @@ import { plantillaDe } from '@/lib/dominio/plantillas';
 import { hashDispositivoActual } from '@/lib/publico/dispositivo';
 import { cargarNegocio } from '@/lib/publico/negocio';
 import { crearClienteAdmin } from '@/lib/supabase/admin';
+import { Logo } from '@/components/marca/Logo';
 import { reservar } from './actions';
-
-const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
-const boton = 'min-h-11 rounded-lg px-4 py-2 text-white';
-const botonSec = 'min-h-11 rounded-lg border border-stone-300 px-3 py-1.5 text-sm';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const negocio = await cargarNegocio((await params).slug);
@@ -76,43 +73,43 @@ export default async function PaginaPublica({
   const recursoEtiqueta = plantilla.recurso.singular.charAt(0).toUpperCase() + plantilla.recurso.singular.slice(1);
 
   return (
-    <main className="mx-auto w-full max-w-xl space-y-6 px-4 py-8 text-stone-900">
+    <main className="mx-auto w-full max-w-xl space-y-6 px-4 py-8 text-blanco">
       <header className="space-y-3">
-        <div className="h-2 rounded-full" style={{ backgroundColor: negocio.color }} aria-hidden />
+        <div className="h-1.5 w-16 rounded-full" style={{ backgroundColor: negocio.color }} aria-hidden />
         <div className="flex items-center gap-4">
           {negocio.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={negocio.logo_url} alt={`Logo de ${negocio.nombre}`} className="h-16 w-16 rounded-xl object-cover" />
           )}
-          <div>
-            <h1 className="text-3xl font-semibold">{negocio.nombre}</h1>
-            <p className="text-stone-600">Pedí tu {reserva} en pocos pasos.</p>
+          <div className="space-y-2">
+            <h1 className="titulo">{negocio.nombre}</h1>
+            <p className="text-niebla">Pedí tu {reserva} en pocos pasos.</p>
           </div>
         </div>
-        {negocio.descripcion && <p className="whitespace-pre-line text-stone-700">{negocio.descripcion}</p>}
+        {negocio.descripcion && <p className="whitespace-pre-line text-niebla">{negocio.descripcion}</p>}
         {(negocio.direccion || negocio.instagram) && (
-          <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600">
+          <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-niebla">
             {negocio.direccion && (
-              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion)}`} target="_blank" rel="noopener noreferrer" className="underline">
-                📍 {negocio.direccion}
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(negocio.direccion)}`} target="_blank" rel="noopener noreferrer" className="enlace">
+                {negocio.direccion}
               </a>
             )}
             {negocio.instagram && (
-              <a href={`https://instagram.com/${negocio.instagram}`} target="_blank" rel="noopener noreferrer" className="underline">
+              <a href={`https://instagram.com/${negocio.instagram}`} target="_blank" rel="noopener noreferrer" className="enlace">
                 @{negocio.instagram}
               </a>
             )}
           </p>
         )}
       </header>
-      {p.error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-red-800">{p.error}</p>}
+      {p.error && <p role="alert" className="aviso-error">{p.error}</p>}
 
       {negocio.servicios.length === 0 ? (
-        <p className="text-stone-500">Este negocio todavía no cargó sus servicios.</p>
+        <p className="text-niebla">Este negocio todavía no cargó sus servicios.</p>
       ) : (
-        <form method="get" className="space-y-3 rounded-xl border border-stone-200 bg-white p-4">
+        <form method="get" className="space-y-3 tarjeta">
           <label className="block text-sm">Servicio
-            <select name="servicio" defaultValue={servicio?.id ?? ''} required className={input}>
+            <select name="servicio" defaultValue={servicio?.id ?? ''} required className="campo">
               <option value="" disabled>Elegí…</option>
               {negocio.servicios.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -122,23 +119,23 @@ export default async function PaginaPublica({
             </select>
           </label>
           <label className="block text-sm">{recursoEtiqueta}
-            <select name="recurso" defaultValue={recursoSel} className={input}>
+            <select name="recurso" defaultValue={recursoSel} className="campo">
               <option value="cualquiera">Cualquiera</option>
               {(servicio ? recursosDelServicio : negocio.recursos).map((r) => <option key={r.id} value={r.id}>{r.nombre}</option>)}
             </select>
           </label>
           <label className="block text-sm">Día
-            <input type="date" name="fecha" min={hoy} max={maxFecha} defaultValue={fecha ?? hoy} required className={input} />
+            <input type="date" name="fecha" min={hoy} max={maxFecha} defaultValue={fecha ?? hoy} required className="campo" />
           </label>
-          <button className={botonSec}>Ver horarios</button>
+          <button className="boton">Ver horarios</button>
         </form>
       )}
 
       {servicio && fecha && (
-        <section aria-label="Horarios" className="space-y-4 rounded-xl border border-stone-200 bg-white p-4">
-          <h2 className="font-semibold capitalize">{etiquetaDia(fecha)}</h2>
+        <section aria-label="Horarios" className="space-y-4 tarjeta">
+          <h2 className="subtitulo">{etiquetaDia(fecha)}</h2>
           {huecos.length === 0 ? (
-            <p className="text-stone-500">No quedan horarios libres ese día. Probá con otro día.</p>
+            <p className="text-niebla">No quedan horarios libres ese día. Probá con otro día.</p>
           ) : (
             <form action={reservar} className="space-y-4">
               <input type="hidden" name="slug" value={slug} />
@@ -146,21 +143,21 @@ export default async function PaginaPublica({
               <input type="hidden" name="servicioId" value={servicio.id} />
               <input type="hidden" name="recursoSel" value={recursoSel} />
               <fieldset className="flex flex-wrap gap-2">
-                <legend className="mb-1 text-sm">Horario</legend>
+                <legend className="etiqueta mb-2">Horarios libres</legend>
                 {huecos.map((h) => (
                   <label key={h.inicio} className="cursor-pointer">
                     <input type="radio" name="inicio" value={h.inicio} required className="peer sr-only" />
-                    <span className="inline-block min-h-11 rounded-lg border border-stone-300 px-3 py-2 text-sm peer-checked:border-stone-900 peer-checked:bg-stone-900 peer-checked:text-white peer-focus-visible:ring-2">
+                    <span className="inline-flex min-h-11 items-center rounded-full border border-cielo px-4 py-2 font-mono text-sm text-cielo transition-colors hover:bg-cielo/10 peer-checked:bg-cielo peer-checked:text-noche peer-focus-visible:ring-2 peer-focus-visible:ring-cielo">
                       {horaLocal(h.inicio)}
                       {recursoSel !== 'cualquiera' && <span className="sr-only"> con {nombreRecurso.get(h.recurso_id)}</span>}
                     </span>
                   </label>
                 ))}
               </fieldset>
-              <label className="block text-sm">Tu nombre<input name="nombre" defaultValue={precarga.nombre} required minLength={2} maxLength={80} autoComplete="name" className={input} /></label>
-              <label className="block text-sm">Tu teléfono (WhatsApp)<input name="telefono" type="tel" inputMode="tel" defaultValue={precarga.telefono} required autoComplete="tel" className={input} /></label>
-              <label className="block text-sm">Nota para el negocio (opcional)<textarea name="nota" defaultValue={p.nota ?? ''} maxLength={500} rows={2} className={input} /></label>
-              <button className={boton} style={{ backgroundColor: negocio.color }}>Pedir {reserva}</button>
+              <label className="block text-sm">Tu nombre<input name="nombre" defaultValue={precarga.nombre} required minLength={2} maxLength={80} autoComplete="name" className="campo" /></label>
+              <label className="block text-sm">Tu teléfono (WhatsApp)<input name="telefono" type="tel" inputMode="tel" defaultValue={precarga.telefono} required autoComplete="tel" className="campo" /></label>
+              <label className="block text-sm">Nota para el negocio (opcional)<textarea name="nota" defaultValue={p.nota ?? ''} maxLength={500} rows={2} className="campo" /></label>
+              <button className="boton w-full sm:w-auto">Pedir {reserva}</button>
             </form>
           )}
         </section>
@@ -168,27 +165,31 @@ export default async function PaginaPublica({
 
       {negocio.productos.length > 0 && (
         <section aria-label="Productos" className="space-y-3">
-          <h2 className="text-xl font-semibold">Productos</h2>
+          <h2 className="subtitulo">Productos</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             {negocio.productos.map((x) => (
-              <li key={x.id} className="flex gap-3 rounded-xl border border-stone-200 bg-white p-3">
+              <li key={x.id} className="flex gap-3 tarjeta">
                 {x.foto_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={x.foto_url} alt="" className="h-20 w-20 shrink-0 rounded-lg object-cover" />
                 ) : (
-                  <span aria-hidden className="h-20 w-20 shrink-0 rounded-lg bg-stone-100" />
+                  <span aria-hidden className="h-20 w-20 shrink-0 rounded-lg bg-linea" />
                 )}
                 <div className="min-w-0 space-y-1 text-sm">
                   <p className="font-medium">{x.nombre}</p>
-                  {Number(x.precio) > 0 && <p>${Number(x.precio).toLocaleString('es-AR')}</p>}
-                  {x.descripcion && <p className="text-stone-600">{x.descripcion}</p>}
-                  {!x.hay_stock && <p className="text-xs text-stone-500">Sin stock por ahora</p>}
+                  {Number(x.precio) > 0 && <p className="font-mono text-cielo">${Number(x.precio).toLocaleString('es-AR')}</p>}
+                  {x.descripcion && <p className="text-niebla">{x.descripcion}</p>}
+                  {!x.hay_stock && <p className="text-xs text-niebla">Sin stock por ahora</p>}
                 </div>
               </li>
             ))}
           </ul>
         </section>
       )}
+
+      <footer className="flex items-center gap-2 border-t border-linea pt-6 text-xs text-niebla">
+        Turnos con <Logo className="h-3.5 w-auto" />
+      </footer>
     </main>
   );
 }

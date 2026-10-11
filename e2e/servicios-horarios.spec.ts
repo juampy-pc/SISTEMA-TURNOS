@@ -14,7 +14,7 @@ test('primeros pasos carga la plantilla del rubro y el checklist se completa', a
 
   await page.getByRole('button', { name: 'Cargar y seguir' }).click();
   await expect(page).toHaveURL(/\/panel$/);
-  await expect(page.getByLabel('Primeros pasos').getByRole('listitem').filter({ hasText: 'Cargá tus servicios' })).toContainText('✅');
+  await expect(page.getByLabel('Primeros pasos').getByRole('listitem').filter({ hasText: 'Cargá tus servicios' })).toContainText('Hecho:');
 
   // Con datos cargados, Primeros pasos ya no se muestra.
   await page.goto('/panel/primeros-pasos');

@@ -63,7 +63,7 @@ test('cliente nuevo: el turno queda pendiente, el dueño lo confirma y el dispos
   const pc = await cliente.newPage();
   await pedirTurno(pc, '09:00', { nombre: 'Marta Ruiz', telefono: '11 5555-6666', nota: 'Vengo con mi hija' });
   await expect(pc).toHaveURL(new RegExp(`/b/${slug}/listo`));
-  await expect(pc.getByRole('heading', { name: 'Pediste tu turno' })).toBeVisible();
+  await expect(pc.getByRole('heading', { name: 'Turno pedido' })).toBeVisible();
   await expect(pc.getByRole('link', { name: 'Avisar por WhatsApp' })).toHaveAttribute('href', /^https:\/\/wa\.me\/5491122223333\?text=/);
 
   // El horario ya no se ofrece.
@@ -88,14 +88,14 @@ test('cliente nuevo: el turno queda pendiente, el dueño lo confirma y el dispos
   await expect(pc.getByLabel('Tu nombre')).toHaveValue('Marta Ruiz');
   await pc.getByRole('radio', { name: /^10:00/ }).check({ force: true });
   await pc.getByRole('button', { name: 'Pedir turno' }).click();
-  await expect(pc.getByRole('heading', { name: '¡Tu turno está confirmado!' })).toBeVisible();
+  await expect(pc.getByRole('heading', { name: 'Turno confirmado' })).toBeVisible();
   await cliente.close();
 
   // Otro dispositivo con el mismo teléfono: vuelve a quedar pendiente.
   const otro = await browser.newContext();
   const po = await otro.newPage();
   await pedirTurno(po, '11:00', { nombre: 'Marta', telefono: '+54 9 11 5555-6666' });
-  await expect(po.getByRole('heading', { name: 'Pediste tu turno' })).toBeVisible();
+  await expect(po.getByRole('heading', { name: 'Turno pedido' })).toBeVisible();
   await otro.close();
 
   // Todo quedó en la misma ficha, con el dispositivo confiable.
@@ -109,7 +109,7 @@ test('quitar el dispositivo hace que el próximo pedido vuelva a quedar pendient
   const cliente = await browser.newContext();
   const pc = await cliente.newPage();
   await pedirTurno(pc, '09:30', { nombre: 'Nico Paz', telefono: '11 7777-8888' });
-  await expect(pc.getByRole('heading', { name: 'Pediste tu turno' })).toBeVisible();
+  await expect(pc.getByRole('heading', { name: 'Turno pedido' })).toBeVisible();
 
   await entrar(page);
   await page.getByRole('region', { name: 'Pendientes de confirmar' }).getByRole('listitem').filter({ hasText: 'Nico Paz' })
@@ -121,6 +121,6 @@ test('quitar el dispositivo hace que el próximo pedido vuelva a quedar pendient
   await expect(page.getByRole('main').getByRole('status')).toContainText('Dispositivo quitado');
 
   await pedirTurno(pc, '10:30', { nombre: 'Nico Paz', telefono: '11 7777-8888' });
-  await expect(pc.getByRole('heading', { name: 'Pediste tu turno' })).toBeVisible();
+  await expect(pc.getByRole('heading', { name: 'Turno pedido' })).toBeVisible();
   await cliente.close();
 });

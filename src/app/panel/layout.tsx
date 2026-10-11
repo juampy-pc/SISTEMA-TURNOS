@@ -1,8 +1,9 @@
-import Link from 'next/link';
+import { Logo } from '@/components/marca/Logo';
 import { itemsDeMenu } from '@/lib/dominio/menu';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { cerrarSesion } from './actions';
+import NavPanel from './NavPanel';
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const ctx = await obtenerContexto();
@@ -11,26 +12,26 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const etiquetaRecursos = plural.charAt(0).toUpperCase() + plural.slice(1);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
-      <header className="border-b border-stone-200 bg-white">
+    <div className="min-h-screen bg-noche text-blanco">
+      <header className="sticky top-0 z-10 border-b border-linea bg-noche/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <div>
-            <p className="text-sm text-stone-500">{ctx.rol.nombre}</p>
-            <h1 className="text-lg font-semibold">{ctx.negocio.nombre}</h1>
+          <div className="flex min-w-0 items-center gap-4">
+            <Logo className="h-6 w-auto shrink-0" />
+            <span aria-hidden className="h-6 w-px bg-linea" />
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-xl leading-none font-bold tracking-[0.04em] uppercase">{ctx.negocio.nombre}</h1>
+              <p className="etiqueta mt-1">{ctx.rol.nombre}</p>
+            </div>
           </div>
           <form action={cerrarSesion}>
-            <button className="min-h-11 rounded-lg border border-stone-300 px-3 py-1.5 text-sm">Salir</button>
+            <button className="boton-sec">Salir</button>
           </form>
         </div>
-        <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 pb-2">
-          {items.map((i) => (
-            <Link key={i.href} href={i.href} className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-stone-100">
-              {i.href === '/panel/recursos' ? etiquetaRecursos : i.etiqueta}
-            </Link>
-          ))}
-        </nav>
+        <NavPanel
+          items={items.map((i) => ({ href: i.href, etiqueta: i.href === '/panel/recursos' ? etiquetaRecursos : i.etiqueta }))}
+        />
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
     </div>
   );
 }

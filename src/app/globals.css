@@ -1,5 +1,111 @@
 @import "tailwindcss";
 
-body {
-  background: #ffffff;
+/* Identidad visual de Open: ver docs/marca/identidad-visual.md. */
+@theme inline {
+  --color-noche: #000000;
+  --color-grafito: #111214;
+  --color-linea: #26292d;
+  --color-niebla: #8c9399;
+  --color-piedra: #5f666c;
+  --color-cielo: #9be7ff;
+  --color-senal: #ff4c14;
+  --color-blanco: #ffffff;
+
+  --font-display: var(--font-big-shoulders), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-noche);
+    color: var(--color-blanco);
+    font-family: var(--font-sans);
+    line-height: 1.45;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-cielo);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-cielo);
+    color: var(--color-noche);
+  }
+  input[type="file"] {
+    font-size: 0.875rem;
+    color: var(--color-niebla);
+  }
+  input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    border: 1px solid var(--color-linea);
+    border-radius: 9999px;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    color: var(--color-blanco);
+    cursor: pointer;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-cielo);
+  }
+}
+
+@layer components {
+  .boton {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-cielo px-5 py-2 text-sm font-medium text-noche transition-colors hover:bg-blanco disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .boton-sec {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-linea px-4 py-2 text-sm text-blanco transition-colors hover:border-niebla disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .boton-peligro {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-senal px-4 py-2 text-sm text-senal transition-colors hover:bg-senal hover:text-noche;
+  }
+  .campo {
+    @apply mt-1 w-full rounded-xl border border-linea bg-noche px-3 py-2 text-base text-blanco placeholder:text-piedra focus:border-cielo focus:outline-none;
+  }
+  .tarjeta {
+    @apply rounded-2xl border border-linea bg-grafito p-4;
+  }
+  .lista {
+    @apply divide-y divide-linea rounded-2xl border border-linea bg-grafito;
+  }
+  .aviso-ok {
+    @apply rounded-xl bg-cielo px-4 py-3 text-noche;
+  }
+  .aviso-error {
+    @apply rounded-xl bg-senal px-4 py-3 text-noche;
+  }
+  .aviso-nota {
+    @apply rounded-xl border border-linea bg-grafito px-4 py-3 text-blanco;
+  }
+  .titulo {
+    @apply font-display text-4xl leading-[0.95] font-bold tracking-[0.03em] uppercase sm:text-5xl;
+  }
+  .subtitulo {
+    @apply font-display text-2xl leading-none font-bold tracking-[0.04em] uppercase;
+  }
+  .etiqueta {
+    @apply font-mono text-xs tracking-[0.12em] text-niebla uppercase;
+  }
+  .enlace {
+    @apply text-cielo underline decoration-cielo/40 underline-offset-4 hover:decoration-cielo;
+  }
+  .capsula {
+    @apply inline-flex min-h-9 items-center gap-2 rounded-full px-4 py-1.5 font-mono text-sm;
+  }
+  .capsula-libre {
+    @apply bg-cielo text-noche;
+  }
+  .capsula-reservado {
+    @apply bg-senal text-noche;
+  }
+  .capsula-ahora {
+    @apply bg-blanco text-noche ring-2 ring-blanco ring-offset-2 ring-offset-noche;
+  }
+  .capsula-pasado {
+    @apply bg-grafito text-niebla;
+  }
 }
