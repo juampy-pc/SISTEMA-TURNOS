@@ -5,7 +5,6 @@ import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
 import { crearCliente } from './actions';
 
-const input = 'w-full rounded-lg border border-stone-300 px-3 py-2';
 
 export default async function ClientesPage({ searchParams }: { searchParams: Promise<{ q?: string; ok?: string; error?: string; nombre?: string; telefono?: string }> }) {
   const ctx = await obtenerContexto();
@@ -28,29 +27,29 @@ export default async function ClientesPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Clientes</h2>
-      {ok && <p role="status" className="rounded-lg bg-green-50 px-3 py-2 text-green-800">{ok}</p>}
-      {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-red-800">{error}</p>}
-      <details open={Boolean(error)} className="rounded-xl border border-stone-200 bg-white p-4">
+      <h2 className="titulo">Clientes</h2>
+      {ok && <p role="status" className="aviso-ok">{ok}</p>}
+      {error && <p role="alert" className="aviso-error">{error}</p>}
+      <details open={Boolean(error)} className="tarjeta">
         <summary className="cursor-pointer font-medium">Nuevo cliente</summary>
         <form action={crearCliente} className="mt-3 space-y-3">
-          <label className="block text-sm">Nombre<input name="nombre" defaultValue={nombre ?? ''} required minLength={2} maxLength={80} className={input} /></label>
-          <label className="block text-sm">Teléfono<input name="telefono" type="tel" inputMode="tel" defaultValue={telefono ?? ''} required className={input} /></label>
-          <label className="block text-sm">Notas (opcional)<textarea name="notas" maxLength={1000} rows={2} className={input} /></label>
-          <button className="min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white">Agregar cliente</button>
+          <label className="block text-sm">Nombre<input name="nombre" defaultValue={nombre ?? ''} required minLength={2} maxLength={80} className="campo" /></label>
+          <label className="block text-sm">Teléfono<input name="telefono" type="tel" inputMode="tel" defaultValue={telefono ?? ''} required className="campo" /></label>
+          <label className="block text-sm">Notas (opcional)<textarea name="notas" maxLength={1000} rows={2} className="campo" /></label>
+          <button className="boton">Agregar cliente</button>
         </form>
       </details>
       <form className="flex gap-2">
-        <input name="q" defaultValue={busqueda} placeholder="Buscar por nombre o teléfono" aria-label="Buscar clientes" className="min-w-0 flex-1 rounded-lg border border-stone-300 px-3 py-2" />
-        <button className="min-h-11 rounded-lg border border-stone-300 px-3 py-1.5 text-sm">Buscar</button>
+        <input name="q" defaultValue={busqueda} placeholder="Buscar por nombre o teléfono" aria-label="Buscar clientes" className="min-w-0 flex-1 rounded-xl border border-linea bg-noche px-3 py-2" />
+        <button className="boton-sec">Buscar</button>
       </form>
-      {clientes.length === 0 && <p className="text-stone-500">{busqueda ? 'No encontramos clientes.' : 'Todavía no tenés clientes: agregalos acá o se crean solos al cargar un turno.'}</p>}
-      <ul className="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white">
+      {clientes.length === 0 && <p className="text-niebla">{busqueda ? 'No encontramos clientes.' : 'Todavía no tenés clientes: agregalos acá o se crean solos al cargar un turno.'}</p>}
+      <ul className="lista">
         {clientes.map((c) => (
           <li key={c.id}>
-            <Link href={`/panel/clientes/${c.id}`} className="flex min-h-11 flex-wrap items-center justify-between gap-2 p-3 hover:bg-stone-50">
+            <Link href={`/panel/clientes/${c.id}`} className="flex min-h-11 flex-wrap items-center justify-between gap-2 p-3 hover:bg-noche">
               <span className="font-medium">{c.nombre}</span>
-              <span className="text-sm text-stone-500">{c.telefono}</span>
+              <span className="text-sm text-niebla">{c.telefono}</span>
             </Link>
           </li>
         ))}

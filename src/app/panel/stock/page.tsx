@@ -5,7 +5,7 @@ import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
 import { guardarStock } from './actions';
 
-const celda = 'w-28 rounded-lg border border-stone-300 px-2 py-2';
+const celda = 'w-28 rounded-xl border border-linea bg-noche px-3 py-2';
 
 export default async function StockPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const ctx = await obtenerContexto();
@@ -19,21 +19,21 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Stock y precios</h2>
-      {ok && <p role="status" className="rounded-lg bg-green-50 px-3 py-2 text-green-800">{ok}</p>}
-      {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-red-800">{error}</p>}
-      <p className="text-sm text-stone-600">Cambiá los números que necesites y guardá todo junto. Para agregar productos andá a <Link href="/panel/productos" className="underline">Productos</Link>.</p>
+      <h2 className="titulo">Stock y precios</h2>
+      {ok && <p role="status" className="aviso-ok">{ok}</p>}
+      {error && <p role="alert" className="aviso-error">{error}</p>}
+      <p className="text-sm text-niebla">Cambiá los números que necesites y guardá todo junto. Para agregar productos andá a <Link href="/panel/productos" className="enlace">Productos</Link>.</p>
 
       {productos.length === 0 ? (
-        <p className="text-stone-500">No tenés productos visibles.</p>
+        <p className="text-niebla">No tenés productos visibles.</p>
       ) : (
         <form action={guardarStock} className="space-y-4">
-          <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
+          <div className="overflow-x-auto rounded-2xl border border-linea bg-grafito">
             <table className="w-full text-sm">
-              <thead className="bg-stone-50 text-left">
+              <thead className="bg-noche text-left">
                 <tr><th className="p-3">Producto</th><th className="p-3">Stock</th><th className="p-3">Precio ($)</th></tr>
               </thead>
-              <tbody className="divide-y divide-stone-200">
+              <tbody className="divide-y divide-linea">
                 {productos.map((x) => (
                   <tr key={x.id}>
                     <td className="p-3">
@@ -49,7 +49,7 @@ export default async function StockPage({ searchParams }: { searchParams: Promis
               </tbody>
             </table>
           </div>
-          <button className="min-h-11 rounded-lg bg-stone-900 px-3 py-1.5 text-sm text-white">Guardar cambios</button>
+          <button className="boton">Guardar cambios</button>
         </form>
       )}
     </div>

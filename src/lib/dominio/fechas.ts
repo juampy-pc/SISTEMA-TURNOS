@@ -37,3 +37,9 @@ export function etiquetaDia(fecha: string): string {
 export function esReciente(iso: string, horas: number, ahora: Date = new Date()): boolean {
   return ahora.getTime() - new Date(iso).getTime() < horas * 60 * 60 * 1000;
 }
+
+/** Si el turno de `inicio` a `fin` está en curso en este momento. */
+export function estaEnCurso(inicio: string, fin: string, ahora: Date = new Date()): boolean {
+  const t = ahora.getTime();
+  return new Date(inicio).getTime() <= t && t < new Date(fin).getTime();
+}
