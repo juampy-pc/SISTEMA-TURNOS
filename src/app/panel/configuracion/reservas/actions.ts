@@ -4,7 +4,7 @@ import { configTurnosSchema } from '@/lib/dominio/esquemas-turnos';
 import { crearVolver, exigirGestionServicios, type Volver } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
-const volver: Volver = crearVolver('/panel/configuracion');
+const volver: Volver = crearVolver('/panel/configuracion/reservas');
 
 export async function guardarConfigTurnos(formData: FormData) {
   const ctx = await exigirGestionServicios(volver);

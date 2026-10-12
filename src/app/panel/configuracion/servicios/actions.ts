@@ -5,7 +5,7 @@ import { plantillaDe } from '@/lib/dominio/plantillas';
 import { crearVolver, type Volver, exigirGestionServicios, leerUuid } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
-const volver: Volver = crearVolver('/panel/servicios');
+const volver: Volver = crearVolver('/panel/configuracion/servicios');
 
 function leerServicio(formData: FormData) {
   const r = servicioSchema.safeParse({

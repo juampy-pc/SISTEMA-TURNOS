@@ -46,7 +46,7 @@ test('el dueño registra su negocio y carga su WhatsApp', async ({ page }) => {
   await page.getByRole('button', { name: 'Cargar y seguir' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 
-  await page.goto('/panel/negocio');
+  await page.goto('/panel/configuracion/negocio');
   await page.getByLabel('WhatsApp del negocio').fill('011 15-2222-3333');
   await page.getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(page.getByRole('main').getByRole('status')).toHaveText('Datos del negocio guardados.');

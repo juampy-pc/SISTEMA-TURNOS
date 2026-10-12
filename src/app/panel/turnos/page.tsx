@@ -196,6 +196,9 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
                       </form>
                     ),
                   )}
+                  {(estado === 'pendiente' || estado === 'confirmado') && (
+                    <Link href={`/panel/turnos/${t.id}/mover`} className="boton-sec" aria-label={`Mover el turno de las ${horaLocal(t.inicio)}`}>Mover</Link>
+                  )}
                 </div>
                 </div>
               </li>

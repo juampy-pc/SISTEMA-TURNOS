@@ -114,7 +114,7 @@ export default async function PaginaPublica({
               <option value="" disabled>Elegí…</option>
               {negocio.servicios.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.nombre} · {s.duracion_min} min{Number(s.precio) > 0 ? ` · $${Number(s.precio)}` : ''}
+                  {s.nombre} · {s.duracion_min} min · {Number(s.precio) > 0 ? `$${Number(s.precio).toLocaleString('es-AR')}` : 'precio a consultar'}
                 </option>
               ))}
             </select>

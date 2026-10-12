@@ -83,7 +83,7 @@ export async function loginEmpleadoCon(page: Page, usuarioTipeado: string, slug:
 }
 
 export async function crearEmpleadoUI(page: Page, e: { nombre: string; usuario: string; password: string }) {
-  await page.goto('/panel/empleados');
+  await page.goto('/panel/configuracion/empleados');
   await page.getByLabel('Nombre', { exact: true }).fill(e.nombre);
   await page.getByLabel('Usuario', { exact: true }).fill(e.usuario);
   await page.getByLabel('Contraseña', { exact: true }).fill(e.password);

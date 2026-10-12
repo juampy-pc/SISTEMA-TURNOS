@@ -389,10 +389,18 @@ isOneToOne: false
               "fin": string,"inicio": string
             }[]
                            },
+"huecos_para_mover":
+{ Args: { "p_fecha": string,"p_recurso": string,"p_servicio": string,"p_turno": string }; Returns: {
+              "fin": string,"inicio": string
+            }[]
+                           },
 "huecos_publicos":
 { Args: { "p_fecha": string,"p_negocio": string,"p_recurso": string,"p_servicio": string }; Returns: {
               "fin": string,"inicio": string,"recurso_id": string
             }[]
+                           },
+"mover_turno":
+{ Args: { "p_inicio": string,"p_recurso": string,"p_servicio": string,"p_turno": string }; Returns: undefined
                            },
 "negocio_publico":
 { Args: { "p_slug": string }; Returns: Json

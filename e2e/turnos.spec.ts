@@ -140,7 +140,7 @@ test('un Profesional ve la agenda del recurso que tiene vinculado', async ({ pag
   const agenda = pp.getByRole('region', { name: 'Agenda del día' });
   await expect(agenda.getByRole('listitem')).toHaveCount(0);
 
-  await page.goto('/panel/recursos');
+  await page.goto('/panel/configuracion/recursos');
   const form = page.locator('form', { has: page.getByLabel('Quién atiende Profesional 1') });
   await form.getByLabel('Quién atiende Profesional 1').selectOption({ label: 'Pablo' });
   await form.getByRole('button', { name: 'Guardar' }).click();
@@ -149,4 +149,22 @@ test('un Profesional ve la agenda del recurso que tiene vinculado', async ({ pag
   await pp.reload();
   await expect(agenda.getByRole('listitem').first()).toBeVisible();
   await otra.close();
+});
+
+test('mover un turno a otro horario libre', async ({ page }) => {
+  await entrar(page);
+  await nuevoTurno(page, '15:00', 'Mora Díaz', '011 15-5555-0000');
+  await expect(page.getByRole('main').getByRole('status')).toHaveText('Turno creado.');
+
+  await page.getByRole('link', { name: 'Mover el turno de las 15:00' }).click();
+  await expect(page.getByRole('heading', { name: 'Mover turno' })).toBeVisible();
+  // El horario actual se ve, pero no se puede elegir.
+  await expect(page.getByRole('radio', { name: /^15:00/ })).toBeDisabled();
+  await page.getByRole('radio', { name: /^16:00/ }).check({ force: true });
+  await page.getByRole('button', { name: 'Mover acá' }).click();
+
+  await expect(page.getByRole('main').getByRole('status')).toContainText('Turno movido');
+  await expect(page.getByRole('main').getByRole('status')).toContainText('16:00');
+  await expect(page.getByText('16:00 a 16:30')).toBeVisible();
+  await expect(page.getByText('15:00 a 15:30')).toHaveCount(0);
 });

@@ -1,6 +1,5 @@
 import { Logo } from '@/components/marca/Logo';
 import { itemsDeMenu } from '@/lib/dominio/menu';
-import { plantillaDe } from '@/lib/dominio/plantillas';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { cerrarSesion } from './actions';
 import NavPanel from './NavPanel';
@@ -8,8 +7,6 @@ import NavPanel from './NavPanel';
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const ctx = await obtenerContexto();
   const items = itemsDeMenu(ctx.rol, undefined, ctx.negocio.vende_productos);
-  const plural = plantillaDe(ctx.negocio.tipo).recurso.plural;
-  const etiquetaRecursos = plural.charAt(0).toUpperCase() + plural.slice(1);
 
   return (
     <div className="min-h-screen bg-noche text-blanco">
@@ -28,7 +25,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </form>
         </div>
         <NavPanel
-          items={items.map((i) => ({ href: i.href, etiqueta: i.href === '/panel/recursos' ? etiquetaRecursos : i.etiqueta }))}
+          items={items.map((i) => ({ href: i.href, etiqueta: i.etiqueta }))}
         />
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>

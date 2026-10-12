@@ -125,7 +125,7 @@ test('un link reservado se rechaza en el servidor y no se crea el negocio', asyn
 
 test('el dueño crea un empleado que entra sin ver Empleados', async ({ page }) => {
   await loginDueno(page);
-  await page.goto('/panel/empleados');
+  await page.goto('/panel/configuracion/empleados');
   await expect(page.getByRole('heading', { name: 'Empleados', exact: true })).toBeVisible();
 
   await page.getByLabel('Nombre', { exact: true }).fill(empleado.nombre);
@@ -138,7 +138,7 @@ test('el dueño crea un empleado que entra sin ver Empleados', async ({ page }) 
 
   await loginEmpleado(page);
   await expect(page.getByRole('link', { name: 'Empleados' })).toHaveCount(0);
-  await page.goto('/panel/empleados');
+  await page.goto('/panel/configuracion/empleados');
   await expect(page).toHaveURL(/\/panel$/);
 });
 
@@ -193,7 +193,7 @@ test('un empleado desactivado con la sesión abierta pierde el acceso', async ({
   const ctxDueno = await browser.newContext();
   const paginaDueno = await ctxDueno.newPage();
   await loginDueno(paginaDueno);
-  await paginaDueno.goto('/panel/empleados');
+  await paginaDueno.goto('/panel/configuracion/empleados');
   await paginaDueno
     .getByRole('listitem')
     .filter({ hasText: empleado.usuario })

@@ -123,9 +123,20 @@ Cada PR es chico y se puede mergear solo. El ⚠️ indica que necesita migraci�
 
 ---
 
-## 5. Decisiones de producto pendientes
+## 5. Decisiones de producto (confirmadas el 12/10/2026)
 
-- ¿Los bloqueos son de día completo o por horas? Propuesta: por horas, en el PR 12.
-- ¿Un servicio con precio 0 significa "a definir"? Propuesta: sí; se muestra "consultar".
-- ¿Los turnos manuales nacen confirmados? Hoy sí. Propuesta: mantenerlo.
-- ¿El cliente puede cancelar hasta cuándo? Propuesta: hasta la anticipación mínima del negocio.
+- **Bloqueos:** por horas, con la opción de bloquear el día completo (PR 12).
+- **Precio 0:** significa "a consultar"; la página pública lo muestra así.
+- **Turnos manuales:** nacen confirmados.
+- **Cancelación por el cliente:** se puede hasta la anticipación mínima del negocio (PR 9).
+- **Estructura del panel:**
+  - **Menú principal:** el trabajo del día (Inicio, Turnos, Clientes, Productos, Stock).
+  - **Configuración:** todo lo que se configura, con sus secciones:
+    - Mi negocio;
+    - Servicios;
+    - Profesionales/Canchas;
+    - Horarios y bloqueos;
+    - Reservas;
+    - Empleados.
+
+  Las secciones nuevas que sean configuración van ahí.

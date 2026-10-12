@@ -5,7 +5,7 @@ import { validarFranjas } from '@/lib/dominio/horarios';
 import { crearVolver, exigirGestionServicios, leerUuid, type Volver } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
-const base = crearVolver('/panel/horarios');
+const base = crearVolver('/panel/configuracion/horarios');
 
 // Conserva el recurso elegido al volver.
 function volverA(recursoId: string | null): Volver {

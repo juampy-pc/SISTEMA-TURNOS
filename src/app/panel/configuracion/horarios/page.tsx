@@ -51,7 +51,7 @@ export default async function HorariosPage({
             {recursos.map((r) => (
               <a
                 key={r.id}
-                href={`/panel/horarios?recurso=${r.id}`}
+                href={`/panel/configuracion/horarios?recurso=${r.id}`}
                 aria-current={r.id === actual?.id ? 'page' : undefined}
                 className={`rounded-full border px-3 py-1.5 text-sm ${r.id === actual?.id ? 'border-cielo bg-cielo text-noche' : 'border-linea bg-grafito'}`}
               >

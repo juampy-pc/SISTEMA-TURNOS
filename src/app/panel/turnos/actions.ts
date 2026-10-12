@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { esFechaISO } from '@/lib/dominio/fechas';
+import { esFechaISO, etiquetaDia, horaLocal, ZONA } from '@/lib/dominio/fechas';
 import { puede } from '@/lib/dominio/permisos';
 import { normalizarTelefono } from '@/lib/dominio/telefono';
 import { esEstadoTurno, transicionesDe } from '@/lib/dominio/turnos';
@@ -126,4 +126,38 @@ export async function cambiarEstado(formData: FormData) {
     .select('id');
   if (error || !data?.length) volver('error', 'No se pudo actualizar el turno.');
   volver('ok', 'Turno actualizado.');
+}
+
+export async function moverTurno(formData: FormData) {
+  const id = leerUuid(formData.get('turnoId'), () => base('error', 'Solicitud inválida.'));
+  const destino = `/panel/turnos/${id}/mover`;
+  const conservar = {
+    fecha: texto(formData.get('fecha'), 10),
+    servicio: texto(formData.get('servicioId'), 36),
+    recurso: texto(formData.get('recursoId'), 36),
+  };
+  const volver: Volver = crearVolver(destino);
+  const error = (mensaje: string): never => volver('error', mensaje, conservar);
+
+  const ctx = await obtenerContexto();
+  if (!puede(ctx.rol, 'gestionar_turnos')) error('No tenés permiso para hacer esto.');
+  const servicioId = leerUuid(formData.get('servicioId'), () => error('Elegí un servicio.'));
+  const recursoId = leerUuid(formData.get('recursoId'), () => error('Elegí con quién.'));
+  const inicio = texto(formData.get('inicio'), 40);
+  if (!inicio || Number.isNaN(Date.parse(inicio))) error('Elegí un horario.');
+
+  const supabase = await crearClienteServidor();
+  const { error: err } = await supabase.rpc('mover_turno', {
+    p_turno: id,
+    p_recurso: recursoId,
+    p_servicio: servicioId,
+    p_inicio: inicio,
+  });
+  if (err) {
+    if (err.message.includes('horario_ocupado') || err.code === '23P01') error('Ese horario se acaba de ocupar. Elegí otro.');
+    if (err.message.includes('no_movible')) error('Ese turno ya no se puede mover.');
+    error('No se pudo mover el turno.');
+  }
+  const fecha = new Date(inicio).toLocaleDateString('en-CA', { timeZone: ZONA });
+  base('ok', `Turno movido: ${etiquetaDia(fecha)}, ${horaLocal(inicio)}.`, { fecha });
 }

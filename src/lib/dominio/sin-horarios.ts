@@ -28,7 +28,7 @@ function mayuscula(s: string): string {
 export function motivoSinHorarios(c: ContextoSinHorarios): string {
   if (c.fecha < c.hoy) return 'Ese día ya pasó. Elegí otro día arriba.';
   if (c.fecha > c.maxFecha) {
-    return `Solo se toman turnos hasta ${c.anticipacionMaxDias} días adelante. Lo cambiás en Configuración avanzada.`;
+    return `Solo se toman turnos hasta ${c.anticipacionMaxDias} días adelante. Lo cambiás en Configuración → Reservas.`;
   }
   const nombreDia = DIAS.find((d) => d.n === new Date(`${c.fecha}T12:00:00Z`).getUTCDay())?.largo.toLowerCase() ?? 'día';
   const dia = nombreDia.endsWith('s') ? nombreDia : `${nombreDia}s`;

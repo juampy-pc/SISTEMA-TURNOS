@@ -28,7 +28,7 @@ test('servicios: alta, error de duración y desactivación', async ({ page }) =>
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 
-  await page.goto('/panel/servicios');
+  await page.goto('/panel/configuracion/servicios');
   await expect(page.getByRole('heading', { name: 'Servicios activos' })).toBeVisible();
   await page.getByRole('main').getByLabel('Nombre').first().fill('Masaje');
   await page.getByLabel('Duración (minutos)').fill('45');
@@ -51,7 +51,7 @@ test('horarios: una franja superpuesta se rechaza y una contigua se acepta', asy
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 
-  await page.goto('/panel/horarios');
+  await page.goto('/panel/configuracion/horarios');
   // El ejemplo ya cargó lun-sáb 09:00-18:00. Probamos una franja que pisa el lunes.
   const form = page.locator('form', { hasText: 'Agregar horario' });
   await form.getByRole('checkbox').evaluateAll((els) => els.forEach((e) => ((e as HTMLInputElement).checked = false)));
@@ -75,7 +75,7 @@ test('bloqueos: fecha de fin anterior se rechaza', async ({ page }) => {
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 
-  await page.goto('/panel/horarios');
+  await page.goto('/panel/configuracion/horarios');
   const form = page.locator('form', { hasText: 'Agregar bloqueo' });
   await form.getByLabel('Desde').fill('2030-12-25');
   await form.getByLabel('Hasta').fill('2030-12-24');
@@ -87,15 +87,16 @@ test('bloqueos: fecha de fin anterior se rechaza', async ({ page }) => {
   await expect(page.getByRole('main').getByRole('status')).toHaveText('Bloqueo guardado.');
 });
 
-test('configuración avanzada: el intervalo entre horarios se guarda', async ({ page }) => {
+test('configuración → reservas: el intervalo entre horarios se guarda', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Email').fill(dueno.email);
   await page.getByLabel('Contraseña', { exact: true }).fill(dueno.password);
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/panel$/);
 
-  await page.getByRole('link', { name: 'Configuración avanzada' }).click();
-  await expect(page).toHaveURL(/\/panel\/configuracion$/);
+  await page.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name: 'Configuración' }).click();
+  await page.getByRole('navigation', { name: 'Configuración' }).getByRole('link', { name: 'Reservas' }).click();
+  await expect(page).toHaveURL(/\/panel\/configuracion\/reservas$/);
   await page.getByLabel('Intervalo entre horarios').selectOption('30');
   await page.getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(page.getByRole('main').getByRole('status')).toHaveText('Configuración guardada.');
