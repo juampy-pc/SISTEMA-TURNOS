@@ -28,7 +28,7 @@ async function elegirCorte(page: Page) {
 async function pedirTurno(page: Page, hora: string, datos?: { nombre: string; telefono: string; nota?: string }) {
   await page.goto(`/b/${slug}`);
   await elegirCorte(page);
-  await page.getByLabel('Día').fill(fecha);
+  await page.locator(`label:has(input[name="fecha"][value="${fecha}"])`).click();
   await page.getByRole('button', { name: 'Ver horarios' }).click();
   await page.getByRole('radio', { name: new RegExp(`^${hora}`) }).check({ force: true });
   if (datos) {
@@ -69,7 +69,7 @@ test('cliente nuevo: el turno queda pendiente, el dueño lo confirma y el dispos
   // El horario ya no se ofrece.
   await pc.goto(`/b/${slug}`);
   await elegirCorte(pc);
-  await pc.getByLabel('Día').fill(fecha);
+  await pc.locator(`label:has(input[name="fecha"][value="${fecha}"])`).click();
   await pc.getByRole('button', { name: 'Ver horarios' }).click();
   await expect(pc.getByRole('radio', { name: /^09:00/ })).toHaveCount(0);
 
@@ -83,7 +83,7 @@ test('cliente nuevo: el turno queda pendiente, el dueño lo confirma y el dispos
   // Mismo dispositivo: los datos se precargan y el turno se confirma solo.
   await pc.goto(`/b/${slug}`);
   await elegirCorte(pc);
-  await pc.getByLabel('Día').fill(fecha);
+  await pc.locator(`label:has(input[name="fecha"][value="${fecha}"])`).click();
   await pc.getByRole('button', { name: 'Ver horarios' }).click();
   await expect(pc.getByLabel('Tu nombre')).toHaveValue('Marta Ruiz');
   await pc.getByRole('radio', { name: /^10:00/ }).check({ force: true });

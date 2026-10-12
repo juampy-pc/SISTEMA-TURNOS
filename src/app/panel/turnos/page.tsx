@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { esFechaISO, estaEnCurso, etiquetaDia, horaLocal, hoyISO, rangoDelDia, sumarDias } from '@/lib/dominio/fechas';
+import { diasDesde, esFechaISO, estaEnCurso, etiquetaDia, lunesDe, horaLocal, hoyISO, rangoDelDia, sumarDias } from '@/lib/dominio/fechas';
 import { puede } from '@/lib/dominio/permisos';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { motivoSinHorarios } from '@/lib/dominio/sin-horarios';
 import { ESTADOS_TURNO, ETIQUETA_ESTADO, esEstadoTurno, transicionesDe } from '@/lib/dominio/turnos';
+import { EstadoVacio } from '@/components/marca/EstadoVacio';
+import { SelectorDias } from '@/components/marca/SelectorDias';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
 import { cambiarEstado, crearTurno } from './actions';
@@ -115,19 +117,32 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
       {p.ok && <p role="status" className="aviso-ok">{p.ok}</p>}
       {p.error && <p role="alert" className="aviso-error">{p.error}</p>}
 
-      <nav aria-label="Elegir día" className="flex flex-wrap items-center gap-2">
-        <Link href={`/panel/turnos?fecha=${sumarDias(fecha, -1)}`} className="boton-sec">← Anterior</Link>
-        <Link href={`/panel/turnos?fecha=${hoyISO()}`} className="boton-sec">Hoy</Link>
-        <Link href={`/panel/turnos?fecha=${sumarDias(fecha, 1)}`} className="boton-sec">Siguiente →</Link>
-        <form className="flex items-center gap-2">
-          <input type="date" name="fecha" defaultValue={fecha} aria-label="Ir a la fecha" className="min-h-11 rounded-full border border-linea bg-noche px-4 py-2 font-mono text-sm" />
-          <button className="boton-sec">Ir</button>
-        </form>
-      </nav>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href={`/panel/turnos?fecha=${sumarDias(fecha, -7)}`} aria-label="Semana anterior" className="boton-sec w-11 px-0 text-xl">‹</Link>
+          <Link href={`/panel/turnos?fecha=${sumarDias(fecha, 7)}`} aria-label="Semana siguiente" className="boton-sec w-11 px-0 text-xl">›</Link>
+          <Link href={`/panel/turnos?fecha=${hoyISO()}`} className="boton-sec">Hoy</Link>
+          <form className="ml-auto flex items-center gap-2">
+            <input type="date" name="fecha" defaultValue={fecha} aria-label="Ir a la fecha" className="min-h-11 rounded-full border border-linea bg-noche px-4 py-2 font-mono text-sm" />
+            <button className="boton-sec">Ir</button>
+          </form>
+        </div>
+        <SelectorDias
+          etiqueta="Días de la semana"
+          dias={diasDesde(lunesDe(fecha), 7)}
+          seleccionado={fecha}
+          hoy={hoyISO()}
+          href={(f) => `/panel/turnos?fecha=${f}`}
+        />
+      </div>
       <p className="subtitulo">{etiquetaDia(fecha)}</p>
 
       <section aria-label="Agenda del día" className="space-y-3">
-        {turnos.length === 0 && <p className="text-niebla">No hay {plantilla.reserva.plural} para este día.</p>}
+        {turnos.length === 0 && (
+          <EstadoVacio titulo={`No hay ${plantilla.reserva.plural} para este día.`}>
+            <a href="#nuevo" className="enlace">Cargá uno abajo</a> o compartí tu página para que te pidan.
+          </EstadoVacio>
+        )}
         <ul className="space-y-3">
           {turnos.map((t) => {
             const estado = esEstadoTurno(t.estado) ? t.estado : 'pendiente';
@@ -189,7 +204,7 @@ export default async function TurnosPage({ searchParams }: { searchParams: Promi
         </ul>
       </section>
 
-      <section aria-label={`Nuevo ${reservaCap}`} className="space-y-4 tarjeta">
+      <section id="nuevo" aria-label={`Nuevo ${reservaCap}`} className="scroll-mt-40 space-y-4 tarjeta">
         <h3 className="subtitulo">Nuevo {reservaCap}</h3>
         <p className="text-sm text-niebla">Para el <span className="font-medium">{etiquetaDia(fecha)}</span>. Para otro día, cambialo arriba.</p>
         {servicios.length === 0 ? (

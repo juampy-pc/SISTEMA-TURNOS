@@ -99,3 +99,20 @@ export async function guardarServiciosDeRecurso(formData: FormData) {
   }
   volver('ok', 'Servicios guardados.');
 }
+
+// Un Profesional solo ve la agenda de los recursos vinculados a él (RLS: private.puede_ver_recurso).
+export async function vincularMiembro(formData: FormData) {
+  const ctx = await exigirGestionServicios(volver);
+  const id = leerUuid(formData.get('recursoId'), solicitudInvalida);
+  const valor = formData.get('miembroId');
+  const miembroId = valor === '' || valor === null ? null : leerUuid(valor, solicitudInvalida);
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase
+    .from('recursos')
+    .update({ miembro_id: miembroId })
+    .eq('id', id)
+    .eq('negocio_id', ctx.negocio.id)
+    .select('id');
+  if (error || !data?.length) volver('error', 'No se pudo guardar quién atiende.');
+  volver('ok', miembroId ? 'Listo: esa persona ya ve esta agenda.' : 'Quitaste a quien atendía.');
+}

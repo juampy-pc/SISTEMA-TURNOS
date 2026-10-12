@@ -3,8 +3,7 @@ import { puede } from '@/lib/dominio/permisos';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
-import { alternarRecurso, crearRecurso, guardarServiciosDeRecurso, renombrarRecurso } from './actions';
-
+import { alternarRecurso, crearRecurso, guardarServiciosDeRecurso, renombrarRecurso, vincularMiembro } from './actions';
 
 export default async function RecursosPage({
   searchParams,
@@ -17,11 +16,13 @@ export default async function RecursosPage({
   const { recurso } = plantillaDe(ctx.negocio.tipo);
 
   const supabase = await crearClienteServidor();
-  const [{ data: recursosData }, { data: serviciosData }, { data: asignaciones }] = await Promise.all([
-    supabase.from('recursos').select('id, nombre, activo').order('orden').order('nombre'),
+  const [{ data: recursosData }, { data: serviciosData }, { data: asignaciones }, { data: miembrosData }] = await Promise.all([
+    supabase.from('recursos').select('id, nombre, activo, miembro_id').order('orden').order('nombre'),
     supabase.from('servicios').select('id, nombre').eq('activo', true).order('nombre'),
     supabase.from('recurso_servicio').select('recurso_id, servicio_id'),
+    supabase.from('miembros').select('id, nombre').eq('activo', true).order('nombre'),
   ]);
+  const miembros = miembrosData ?? [];
   const recursos = recursosData ?? [];
   const servicios = serviciosData ?? [];
   const asignado = new Set((asignaciones ?? []).map((a) => `${a.recurso_id}:${a.servicio_id}`));
@@ -51,6 +52,18 @@ export default async function RecursosPage({
               <label className="flex-1 text-sm">Nombre<input name="nombre" defaultValue={r.nombre} required minLength={2} maxLength={60} className="campo" /></label>
               <button className="boton-sec">Guardar</button>
             </form>
+            {miembros.length > 0 && (
+              <form action={vincularMiembro} className="flex items-end gap-2">
+                <input type="hidden" name="recursoId" value={r.id} />
+                <label className="flex-1 text-sm">Quién atiende
+                  <select name="miembroId" defaultValue={r.miembro_id ?? ''} aria-label={`Quién atiende ${r.nombre}`} className="campo">
+                    <option value="">Nadie en particular</option>
+                    {miembros.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                  </select>
+                </label>
+                <button className="boton-sec">Guardar</button>
+              </form>
+            )}
             <form action={guardarServiciosDeRecurso} className="space-y-2">
               <input type="hidden" name="recursoId" value={r.id} />
               <p className="text-sm font-medium">Servicios que realiza</p>
@@ -66,7 +79,7 @@ export default async function RecursosPage({
             <form action={alternarRecurso}>
               <input type="hidden" name="recursoId" value={r.id} />
               <input type="hidden" name="activar" value="no" />
-              <button className="text-sm text-senal underline">Desactivar</button>
+              <button className="text-sm text-senal underline underline-offset-4">Desactivar</button>
             </form>
           </section>
         ))}
