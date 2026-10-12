@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest';
-import { esFechaISO, esReciente, horaLocal, hoyISO, rangoDelDia, sumarDias } from './fechas';
+import { describe, expect, it, test } from 'vitest';
+import { diasDesde, esFechaISO, esReciente, horaLocal, hoyISO, lunesDe, partesDia, rangoDelDia, sumarDias } from './fechas';
 
 describe('fechas', () => {
   test('hoyISO usa la hora argentina (a las 01:00 UTC todavía es el día anterior)', () => {
@@ -27,5 +27,21 @@ describe('esReciente', () => {
     const ahora = new Date('2026-10-10T12:00:00Z');
     expect(esReciente('2026-10-10T00:30:00Z', 24, ahora)).toBe(true);
     expect(esReciente('2026-10-09T11:00:00Z', 24, ahora)).toBe(false);
+  });
+});
+
+describe('días compactos', () => {
+  it('partesDia da el día de la semana y el número', () => {
+    expect(partesDia('2026-10-13')).toEqual({ semana: 'mar', numero: 13 });
+    expect(partesDia('2026-10-11')).toEqual({ semana: 'dom', numero: 11 });
+  });
+  it('diasDesde arma días consecutivos y cruza de mes', () => {
+    expect(diasDesde('2026-10-30', 3)).toEqual(['2026-10-30', '2026-10-31', '2026-11-01']);
+    expect(diasDesde('2026-10-30', 0)).toEqual([]);
+  });
+  it('lunesDe vuelve al lunes, y el domingo pertenece a la semana anterior', () => {
+    expect(lunesDe('2026-10-14')).toBe('2026-10-12');
+    expect(lunesDe('2026-10-12')).toBe('2026-10-12');
+    expect(lunesDe('2026-10-18')).toBe('2026-10-12');
   });
 });

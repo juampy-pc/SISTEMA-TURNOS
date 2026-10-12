@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { hoyISO, sumarDias } from '../src/lib/dominio/fechas';
-import { llenarHastaPaso3, type Cuenta } from './helpers';
+import { crearEmpleadoUI, llenarHastaPaso3, loginEmpleadoCon, type Cuenta } from './helpers';
 
 const sufijo = Date.now().toString(36);
 const dueno: Cuenta = { email: `tu-${sufijo}@example.com`, password: 'clave-segura-1', nombre: 'Tomás' };
@@ -125,4 +125,28 @@ test('un empleado sin permiso de turnos no entra a la agenda', async ({ page }) 
   await entrar(page);
   await page.goto('/panel/turnos');
   await expect(page.getByRole('heading', { name: 'Turnos', level: 2 })).toBeVisible();
+});
+
+test('un Profesional ve la agenda del recurso que tiene vinculado', async ({ page, browser }) => {
+  const pablo = { nombre: 'Pablo', usuario: `pablo${sufijo}`, password: 'clave-empleado-1' };
+  await entrar(page);
+  await crearEmpleadoUI(page, pablo);
+  await expect(page.getByRole('main').getByRole('status')).toBeVisible();
+
+  const otra = await browser.newContext();
+  const pp = await otra.newPage();
+  await loginEmpleadoCon(pp, pablo.usuario, slug, pablo.password);
+  await pp.goto(`/panel/turnos?fecha=${fecha}`);
+  const agenda = pp.getByRole('region', { name: 'Agenda del día' });
+  await expect(agenda.getByRole('listitem')).toHaveCount(0);
+
+  await page.goto('/panel/recursos');
+  const form = page.locator('form', { has: page.getByLabel('Quién atiende Profesional 1') });
+  await form.getByLabel('Quién atiende Profesional 1').selectOption({ label: 'Pablo' });
+  await form.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByRole('main').getByRole('status')).toHaveText('Listo: esa persona ya ve esta agenda.');
+
+  await pp.reload();
+  await expect(agenda.getByRole('listitem').first()).toBeVisible();
+  await otra.close();
 });

@@ -1,12 +1,17 @@
 import Link from 'next/link';
 import { pasosIniciales } from '@/lib/dominio/checklist';
-import { etiquetaDia, horaLocal, ZONA } from '@/lib/dominio/fechas';
+import { estaEnCurso, etiquetaDia, horaLocal, hoyISO, rangoDelDia, ZONA } from '@/lib/dominio/fechas';
 import { puede } from '@/lib/dominio/permisos';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { obtenerContexto } from '@/lib/panel/contexto';
 import { crearClienteServidor } from '@/lib/supabase/server';
+import { ETIQUETA_ESTADO, esEstadoTurno } from '@/lib/dominio/turnos';
+import { EstadoVacio } from '@/components/marca/EstadoVacio';
 import { cambiarEstado } from './turnos/actions';
 
+function pesos(n: number): string {
+  return `$${n.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`;
+}
 
 export default async function InicioPage() {
   const ctx = await obtenerContexto();
@@ -24,6 +29,30 @@ export default async function InicioPage() {
         .limit(20)
     : { data: [] };
   const pendientes = pendientesData ?? [];
+
+  // Hoy: turnos del día e indicadores (los ingresos solo con permiso).
+  const hoy = hoyISO();
+  const { desde, hasta } = rangoDelDia(hoy);
+  const veTurnos = puede(ctx.rol, 'gestionar_turnos');
+  const veIngresos = puede(ctx.rol, 'ver_ingresos');
+  const [{ data: hoyData }, { data: ventasHoy }] = await Promise.all([
+    veTurnos
+      ? supabase
+          .from('turnos')
+          .select('id, inicio, fin, estado, monto_cobrado, servicio:servicios(nombre), cliente:clientes(nombre)')
+          .gte('inicio', desde)
+          .lt('inicio', hasta)
+          .order('inicio')
+      : Promise.resolve({ data: [] as never[] }),
+    veIngresos && ctx.negocio.vende_productos
+      ? supabase.from('ventas').select('monto').gte('created_at', desde).lt('created_at', hasta)
+      : Promise.resolve({ data: [] as never[] }),
+  ]);
+  const turnosHoy = (hoyData ?? []).filter((t) => t.estado !== 'cancelado');
+  const cobradoHoy =
+    turnosHoy.reduce((s, t) => s + Number(t.monto_cobrado ?? 0), 0) +
+    (ventasHoy ?? []).reduce((s, v) => s + Number(v.monto), 0);
+  const quedan = turnosHoy.filter((t) => t.estado === 'confirmado' || t.estado === 'pendiente').length;
 
   let pasos: ReturnType<typeof pasosIniciales> = [];
   if (ctx.rol.es_dueno) {
@@ -51,6 +80,59 @@ export default async function InicioPage() {
           Acá vas a manejar tus {plantilla.reserva.plural} y tus {plantilla.recurso.plural}.
         </p>
       </section>
+
+      {veTurnos && (
+        <section aria-label="Hoy" className="space-y-4">
+          <div className="flex items-end justify-between gap-4">
+            <h3 className="subtitulo">Hoy <span className="font-mono text-sm font-normal tracking-normal text-niebla normal-case">{etiquetaDia(hoy)}</span></h3>
+            <Link href="/panel/turnos" className="enlace text-sm">Ver agenda</Link>
+          </div>
+          <dl className="grid grid-cols-3 gap-3">
+            <div className="tarjeta">
+              <dt className="etiqueta">{plantilla.reserva.plural}</dt>
+              <dd className="truncate font-display text-3xl font-bold sm:text-4xl">{turnosHoy.length}</dd>
+            </div>
+            <div className="tarjeta">
+              <dt className="etiqueta">Quedan</dt>
+              <dd className="truncate font-display text-3xl font-bold sm:text-4xl text-cielo">{quedan}</dd>
+            </div>
+            <div className="tarjeta">
+              <dt className="etiqueta">{veIngresos ? 'Cobrado' : 'A confirmar'}</dt>
+              <dd className="truncate font-display text-3xl font-bold sm:text-4xl">{veIngresos ? pesos(cobradoHoy) : pendientes.length}</dd>
+            </div>
+          </dl>
+          {turnosHoy.length === 0 ? (
+            <EstadoVacio titulo={`No tenés ${plantilla.reserva.plural} hoy.`}>
+              Compartí tu página <span className="font-mono text-cielo">/b/{ctx.negocio.slug}</span> para que te pidan.
+            </EstadoVacio>
+          ) : (
+            <ul className="lista">
+              {turnosHoy.map((t) => {
+                const estado = esEstadoTurno(t.estado) ? t.estado : 'pendiente';
+                const ahora = estado === 'confirmado' && estaEnCurso(t.inicio, t.fin);
+                const servicio = t.servicio as unknown as { nombre: string } | null;
+                const cliente = t.cliente as unknown as { nombre: string } | null;
+                const pasado = estado === 'completado' || estado === 'no_vino';
+                return (
+                  <li key={t.id} className={`flex items-center gap-4 px-4 py-3 ${pasado ? 'text-niebla' : ''}`}>
+                    <span className="w-12 shrink-0 font-mono text-sm">{horaLocal(t.inicio)}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {servicio?.nombre} <span className="text-niebla">· {cliente?.nombre}</span>
+                    </span>
+                    <span
+                      className={`capsula min-h-0 py-0.5 text-xs tracking-[0.1em] uppercase ${
+                        ahora ? 'capsula-ahora' : estado === 'confirmado' ? 'capsula-reservado' : estado === 'pendiente' ? 'border border-senal text-senal' : 'capsula-pasado'
+                      }`}
+                    >
+                      {ahora ? 'Ahora' : ETIQUETA_ESTADO[estado]}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      )}
 
       {pendientes.length > 0 && (
         <section aria-label="Pendientes de confirmar" className="space-y-3 rounded-2xl border border-senal bg-grafito p-4">

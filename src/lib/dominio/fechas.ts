@@ -43,3 +43,22 @@ export function estaEnCurso(inicio: string, fin: string, ahora: Date = new Date(
   const t = ahora.getTime();
   return new Date(inicio).getTime() <= t && t < new Date(fin).getTime();
 }
+
+const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+
+/** Partes para mostrar un día compacto: "lun" y "12". */
+export function partesDia(fecha: string): { semana: string; numero: number } {
+  const d = new Date(`${fecha}T12:00:00Z`);
+  return { semana: DIAS_CORTOS[d.getUTCDay()], numero: d.getUTCDate() };
+}
+
+/** Los `cantidad` días consecutivos desde `desde` (incluido). */
+export function diasDesde(desde: string, cantidad: number): string[] {
+  return Array.from({ length: Math.max(0, cantidad) }, (_, i) => sumarDias(desde, i));
+}
+
+/** Lunes de la semana de `fecha`. */
+export function lunesDe(fecha: string): string {
+  const dia = new Date(`${fecha}T12:00:00Z`).getUTCDay();
+  return sumarDias(fecha, dia === 0 ? -6 : 1 - dia);
+}

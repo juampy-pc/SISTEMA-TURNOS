@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { esFechaISO, etiquetaDia, horaLocal, hoyISO, sumarDias } from '@/lib/dominio/fechas';
+import { diasDesde, esFechaISO, etiquetaDia, horaLocal, hoyISO, sumarDias } from '@/lib/dominio/fechas';
 import { plantillaDe } from '@/lib/dominio/plantillas';
 import { hashDispositivoActual } from '@/lib/publico/dispositivo';
 import { cargarNegocio } from '@/lib/publico/negocio';
 import { crearClienteAdmin } from '@/lib/supabase/admin';
 import { Logo } from '@/components/marca/Logo';
+import { SelectorDias } from '@/components/marca/SelectorDias';
 import { reservar } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -124,9 +125,13 @@ export default async function PaginaPublica({
               {(servicio ? recursosDelServicio : negocio.recursos).map((r) => <option key={r.id} value={r.id}>{r.nombre}</option>)}
             </select>
           </label>
-          <label className="block text-sm">Día
-            <input type="date" name="fecha" min={hoy} max={maxFecha} defaultValue={fecha ?? hoy} required className="campo" />
-          </label>
+          <SelectorDias
+            etiqueta="Día"
+            nombre="fecha"
+            hoy={hoy}
+            dias={diasDesde(hoy, Math.min(negocio.anticipacion_max_dias, 60) + 1)}
+            seleccionado={fecha ?? hoy}
+          />
           <button className="boton">Ver horarios</button>
         </form>
       )}
