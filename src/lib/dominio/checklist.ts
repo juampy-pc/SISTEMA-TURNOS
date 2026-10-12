@@ -22,25 +22,25 @@ export function pasosIniciales(
       id: 'servicios',
       texto: 'Cargá tus servicios',
       hecho: estado.cantidadServicios > 0,
-      href: '/panel/servicios',
+      href: '/panel/configuracion/servicios',
     },
     {
       id: 'recursos',
       texto: `Cargá tus ${recurso.plural}`,
       hecho: estado.cantidadRecursos > 0,
-      href: '/panel/recursos',
+      href: '/panel/configuracion/recursos',
     },
     {
       id: 'horarios',
       texto: 'Definí tus horarios',
       hecho: estado.cantidadHorarios > 0,
-      href: '/panel/horarios',
+      href: '/panel/configuracion/horarios',
     },
     {
       id: 'equipo',
       texto: 'Sumá a tu equipo (opcional)',
       hecho: estado.cantidadMiembros > 1,
-      href: '/panel/empleados',
+      href: '/panel/configuracion/empleados',
     },
   ];
 }

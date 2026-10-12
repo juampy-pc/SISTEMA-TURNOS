@@ -27,7 +27,8 @@ test('Mi negocio: datos, marca, logo y activar productos', async ({ page }) => {
   await expect(page).toHaveURL(/\/panel\/primeros-pasos$/);
   await page.getByRole('link', { name: 'Prefiero cargarlo yo' }).click();
 
-  await page.getByRole('link', { name: 'Mi negocio' }).click();
+  await page.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name: 'Configuración' }).click();
+  await page.getByRole('navigation', { name: 'Configuración' }).getByRole('link', { name: 'Mi negocio' }).click();
   await page.getByLabel('Descripción').fill('Cortes clásicos y modernos.');
   await page.getByLabel('Instagram').fill('https://instagram.com/negocio.e2e');
   await page.getByText('Azul', { exact: true }).click();

@@ -12,9 +12,9 @@ import { crearClienteServidor } from '@/lib/supabase/server';
 
 // Nota: redirect() lanza una excepción; nunca llamar a volver() dentro de un try/catch.
 function volver(tipo: 'ok' | 'error', mensaje: string, extra: Record<string, string> = {}): never {
-  revalidatePath('/panel/empleados');
+  revalidatePath('/panel/configuracion/empleados');
   const qs = new URLSearchParams({ [tipo]: mensaje, ...extra });
-  redirect(`/panel/empleados?${qs.toString()}`);
+  redirect(`/panel/configuracion/empleados?${qs.toString()}`);
 }
 
 async function exigirDueno() {

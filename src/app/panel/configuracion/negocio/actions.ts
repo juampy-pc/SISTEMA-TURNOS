@@ -9,7 +9,7 @@ import { obtenerContexto } from '@/lib/panel/contexto';
 import { borrarImagen, subirImagen } from '@/lib/panel/imagenes';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
-const volver: Volver = crearVolver('/panel/negocio');
+const volver: Volver = crearVolver('/panel/configuracion/negocio');
 
 async function exigirNegocio() {
   const ctx = await obtenerContexto();

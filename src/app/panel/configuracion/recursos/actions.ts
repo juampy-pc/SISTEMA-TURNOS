@@ -4,7 +4,7 @@ import { recursoSchema } from '@/lib/dominio/esquemas-turnos';
 import { crearVolver, type Volver, exigirGestionServicios, leerUuid } from '@/lib/panel/acciones';
 import { crearClienteServidor } from '@/lib/supabase/server';
 
-const volver: Volver = crearVolver('/panel/recursos');
+const volver: Volver = crearVolver('/panel/configuracion/recursos');
 const solicitudInvalida = () => volver('error', 'Solicitud inválida.');
 
 function leerNombre(formData: FormData) {

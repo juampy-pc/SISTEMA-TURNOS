@@ -34,7 +34,7 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
         <h2 className="titulo">Productos</h2>
         <p className="text-niebla">
           Tu negocio no tiene activada la venta de productos.{' '}
-          {puede(ctx.rol, 'editar_negocio') && <>Activala en <Link href="/panel/negocio" className="enlace">Mi negocio</Link>.</>}
+          {puede(ctx.rol, 'editar_negocio') && <>Activala en <Link href="/panel/configuracion/negocio" className="enlace">Mi negocio</Link>.</>}
         </p>
       </div>
     );
